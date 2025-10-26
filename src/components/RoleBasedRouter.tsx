@@ -14,7 +14,7 @@ export function RoleBasedRouter() {
   const [kycCompleted, setKycCompleted] = React.useState(false);
 
   // Debug logs
-  console.log('🔍 RoleBasedRouter Debug:', {
+  console.log('🔍 RoleBasedRouter Debug (Mock):', {
     kycCompleted,
     roleData,
     status,
@@ -59,7 +59,7 @@ export function RoleBasedRouter() {
     );
   }
 
-  // KYC Verification
+  // KYC Verification (simplified for mock)
   if (!kycCompleted) {
     return (
       <KYCVerification 
@@ -74,11 +74,11 @@ export function RoleBasedRouter() {
 
   // After KYC completion, show role setup if no role is selected
   if (kycCompleted && (roleData?.role === 'UNASSIGNED' || !roleData?.role)) {
-    console.log('🎭 Showing role setup after KYC completion');
+    console.log('🎭 Showing role setup after KYC completion (Mock)');
     return (
       <RoleSetup 
         onRoleSelected={(role) => {
-          console.log(`Role ${role} selected, will be saved by useUserRole hook`);
+          console.log(`Role ${role} selected, will be saved by mock useUserRole hook`);
         }} 
         isVisible={true} 
       />
@@ -87,6 +87,7 @@ export function RoleBasedRouter() {
 
   // If KYC is completed and role is selected, show appropriate dashboard
   if (kycCompleted && roleData?.role && roleData.role !== 'UNASSIGNED') {
+    console.log(`🎯 Rendering dashboard for role: ${roleData.role} (Mock)`);
     switch (roleData.role) {
       case 'DOCTOR':
         return <DoctorDashboard />;

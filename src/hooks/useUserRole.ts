@@ -1,16 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
-import { SealService, type RoleMetadata } from '../services/sealService';
-import { WalrusService } from '../services/walrusService';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 
-// WARNING: Walrus Testnet is periodically wiped and restarted
-// This means user role data can be lost at any time
-// For production use, migrate to Mainnet with proper JWT authentication
-// 
-// PRODUCTION REQUIREMENTS:
-// - Mainnet RPC endpoints must be used for production applications
-// - Rate limiting applies; high traffic requires dedicated nodes or professional providers
-// - Seal's on-chain policy requirement means Move contracts and Key Servers must be tested in stable Mainnet environment
+// MOCK VERSION: Simplified role management for UI development
+// This bypasses Seal encryption and Walrus storage issues temporarily
+// In production, this should use real Seal/Walrus integration
 
 export type UserRole = 'DOCTOR' | 'PHARMACY' | 'PATIENT' | 'UNASSIGNED';
 
@@ -23,34 +16,89 @@ export interface UserRoleData {
 
 export type RoleStatus = 'idle' | 'loading' | 'loaded' | 'error' | 'not_found';
 
+// Mock role storage key
+const ROLE_STORAGE_KEY = 'sui_care_mock_role';
+
+// Helper function to get stored role from localStorage
+function getStoredRole(address: string | undefined): UserRoleData | null {
+  if (!address) return null;
+  
+  try {
+    const stored = localStorage.getItem(`${ROLE_STORAGE_KEY}_${address}`);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return {
+        ...parsed,
+        selectedAt: new Date(parsed.selectedAt)
+      };
+    }
+  } catch (error) {
+    console.warn('Failed to parse stored role:', error);
+  }
+  
+  return null;
+}
+
+// Helper function to store role in localStorage
+function storeRole(address: string, roleData: UserRoleData): void {
+  try {
+    localStorage.setItem(`${ROLE_STORAGE_KEY}_${address}`, JSON.stringify(roleData));
+  } catch (error) {
+    console.warn('Failed to store role:', error);
+  }
+}
+
+// Helper function to clear stored role
+function clearStoredRole(address: string): void {
+  try {
+    localStorage.removeItem(`${ROLE_STORAGE_KEY}_${address}`);
+  } catch (error) {
+    console.warn('Failed to clear stored role:', error);
+  }
+}
+
 export function useUserRole() {
   const account = useCurrentAccount();
-  const suiClient = useSuiClient();
   const [roleData, setRoleData] = useState<UserRoleData | null>(null);
   const [status, setStatus] = useState<RoleStatus>('idle');
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize services
-  const sealService = new SealService(suiClient);
-  const walrusService = new WalrusService('testnet');
-
-  // Load user role from Walrus
+  // Load user role from localStorage (mock)
   const loadUserRole = useCallback(async (): Promise<UserRoleData | null> => {
     if (!account?.address) {
       setStatus('idle');
       return null;
     }
 
-    // TEMPORARY FIX: Skip Walrus check due to Testnet instability
-    // Go directly to role selection
-    console.warn('⚠️ Walrus Testnet is unstable - Skipping role check, going to role selection');
-    setStatus('not_found');
-    setRoleData({ role: 'UNASSIGNED', selectedAt: new Date(), kycVerified: true });
-    console.log('🔍 useUserRole: Set roleData to UNASSIGNED with kycVerified: true');
-    return null;
+    setStatus('loading');
+    
+    try {
+      // Simulate loading delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const storedRole = getStoredRole(account.address);
+      
+      if (storedRole) {
+        setRoleData(storedRole);
+        setStatus('loaded');
+        console.log('🎭 Mock role loaded:', storedRole.role);
+        return storedRole;
+      } else {
+        setStatus('not_found');
+        setRoleData({ role: 'UNASSIGNED', selectedAt: new Date(), kycVerified: true });
+        console.log('🔍 Mock role: No role found, setting to UNASSIGNED');
+        return null;
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(errorMessage);
+      setStatus('error');
+      console.error('Error loading mock role:', err);
+      return null;
+    }
   }, [account?.address]);
 
-  // Save user role to Walrus
+  // Save user role to localStorage (mock)
   const saveUserRole = useCallback(async (role: UserRole, kycVerified: boolean = true): Promise<boolean> => {
     if (!account?.address) {
       setError('No wallet connected');
@@ -61,69 +109,60 @@ export function useUserRole() {
     setError(null);
 
     try {
-      // Create role metadata
-      const roleMetadata: RoleMetadata = {
-        address: account.address,
-        role,
-        timestamp: Date.now(),
-        kycVerified,
-      };
-
-      // Generate blob ID
-      const blobId = sealService.generateBlobId(account.address, role);
-
-      // Encrypt role data
-      const encryptedBlob = await sealService.encryptRoleData(roleMetadata, account.address);
-
-      // Store in Walrus
-      console.log('🔄 Storing role data in Walrus Testnet (data may be wiped at any time)');
-      await walrusService.storeRoleData(encryptedBlob, blobId);
-      console.log('✅ Role data stored successfully in Walrus');
-
-      // Update local state
+      // Simulate saving delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const userRoleData: UserRoleData = {
         role,
-        selectedAt: new Date(roleMetadata.timestamp),
+        selectedAt: new Date(),
         kycVerified,
-        blobId,
+        blobId: `mock_blob_${Date.now()}`, // Mock blob ID
       };
 
+      // Store in localStorage
+      storeRole(account.address, userRoleData);
+      
       setRoleData(userRoleData);
       setStatus('loaded');
-      console.log('🎉 User role loaded successfully');
+      console.log('✅ Mock role saved:', role);
       return true;
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       setStatus('error');
-      console.error('Error saving user role:', err);
+      console.error('Error saving mock role:', err);
       return false;
     }
-  }, [account?.address, sealService, walrusService]);
+  }, [account?.address]);
 
-  // Clear user role
+  // Clear user role from localStorage (mock)
   const clearUserRole = useCallback(async (): Promise<boolean> => {
-    if (!roleData?.blobId) {
-      setRoleData(null);
-      setStatus('idle');
-      return true;
+    if (!account?.address) {
+      setError('No wallet connected');
+      return false;
     }
+
+    setStatus('loading');
+    setError(null);
 
     try {
-      // Delete from Walrus
-      await walrusService.deleteRoleData(roleData.blobId);
+      // Simulate clearing delay
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Clear local state
+      clearStoredRole(account.address);
       setRoleData(null);
-      setStatus('idle');
-      setError(null);
+      setStatus('not_found');
+      console.log('✅ Mock role cleared');
       return true;
     } catch (err) {
-      console.error('Error clearing user role:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(errorMessage);
+      setStatus('error');
+      console.error('Error clearing mock role:', err);
       return false;
     }
-  }, [roleData?.blobId, walrusService]);
+  }, [account?.address]);
 
   // Auto-load role when account changes
   useEffect(() => {
@@ -134,7 +173,7 @@ export function useUserRole() {
       setStatus('idle');
       setError(null);
     }
-  }, [account?.address]);
+  }, [account?.address, loadUserRole]);
 
   return {
     roleData,
