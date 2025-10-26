@@ -15,7 +15,11 @@ export function HealthDataManager() {
   const account = useCurrentAccount();
   const { roleData } = useUserRole();
   const suiClient = useSuiClient();
-  const [dataService] = useState(() => new DataService(suiClient));
+  const [dataService] = useState(() => new DataService(
+    suiClient, 
+    '0x0', // Package ID - should be replaced with actual deployed package ID
+    '0x0'  // Policy Object ID - should be replaced with actual policy object ID
+  ));
   
   const [healthData, setHealthData] = useState<HealthData[]>([]);
   const [loading, setLoading] = useState(false);
