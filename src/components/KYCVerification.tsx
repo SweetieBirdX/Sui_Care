@@ -1,6 +1,8 @@
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { useZKProofVerification } from '../hooks/useZKProofVerification';
-import { useEffect } from 'react';
+import { useUserRole, type UserRole } from '../hooks/useUserRole';
+import { RoleSelection } from './RoleSelection';
+import { useEffect, useState } from 'react';
 
 export function KYCVerification() {
   const account = useCurrentAccount();
@@ -12,6 +14,9 @@ export function KYCVerification() {
     loadStoredVerification,
     resetVerification,
   } = useZKProofVerification();
+  
+  const { roleData } = useUserRole();
+  const [showRoleSelection, setShowRoleSelection] = useState(false);
 
   // Load stored verification on mount
   useEffect(() => {
@@ -29,6 +34,13 @@ export function KYCVerification() {
     }
   }, [verificationResult, checkVerificationStatus]);
 
+  // Show role selection after KYC verification
+  useEffect(() => {
+    if (status === 'verified' && !roleData && !showRoleSelection) {
+      setShowRoleSelection(true);
+    }
+  }, [status, roleData, showRoleSelection]);
+
   const handleVerifyKYC = async () => {
     if (!account?.address) return;
     
@@ -37,6 +49,11 @@ export function KYCVerification() {
 
   const handleResetVerification = () => {
     resetVerification();
+    setShowRoleSelection(false);
+  };
+
+  const handleRoleSelected = (_role: UserRole) => {
+    setShowRoleSelection(false);
   };
 
   if (!account) {
@@ -103,6 +120,16 @@ export function KYCVerification() {
               <strong>Expires At:</strong>
               <span>{verificationResult.expiresAt?.toLocaleString()}</span>
             </div>
+            {roleData && (
+              <div className="detail-item">
+                <strong>Role:</strong>
+                <span className="role-badge">
+                  {roleData.role === 'doctor' && '👨‍⚕️ Doctor'}
+                  {roleData.role === 'pharmacist' && '👩‍⚕️ Pharmacist'}
+                  {roleData.role === 'patient' && '👤 Patient'}
+                </span>
+              </div>
+            )}
           </div>
           
           <button 
@@ -113,6 +140,12 @@ export function KYCVerification() {
           </button>
         </div>
       )}
+
+      {/* Role Selection Component */}
+      <RoleSelection 
+        onRoleSelected={handleRoleSelected}
+        isVisible={showRoleSelection}
+      />
 
       {status === 'failed' && (
         <div className="kyc-failed">
