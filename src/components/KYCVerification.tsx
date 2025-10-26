@@ -146,9 +146,9 @@ export function KYCVerification({ onKYCComplete, isVisible }: KYCVerificationPro
               <div className="detail-item">
                 <strong>Role:</strong>
                 <span className="role-badge">
-                  {roleData.role === 'doctor' && '👨‍⚕️ Doctor'}
-                  {roleData.role === 'pharmacist' && '👩‍⚕️ Pharmacist'}
-                  {roleData.role === 'patient' && '👤 Patient'}
+                  {roleData.role === 'DOCTOR' && '👨‍⚕️ Doctor'}
+                  {roleData.role === 'PHARMACY' && '👩‍⚕️ Pharmacist'}
+                  {roleData.role === 'PATIENT' && '👤 Patient'}
                 </span>
               </div>
             )}

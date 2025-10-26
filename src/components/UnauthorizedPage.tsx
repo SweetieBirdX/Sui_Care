@@ -1,4 +1,3 @@
-import React from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 
 export function UnauthorizedPage() {

@@ -22,7 +22,7 @@ export function AccessRequestManager() {
   const [selectedDataId, setSelectedDataId] = useState('');
   const [lifetimeEpochs, setLifetimeEpochs] = useState(7);
 
-  // Load access requests (mock data for now)
+  // Load access requests
   const loadAccessRequests = useCallback(async () => {
     if (!account?.address || !roleData?.role) {
       setAccessRequests([]);
@@ -34,8 +34,8 @@ export function AccessRequestManager() {
     
     try {
       // In production, this would query on-chain events
-      // For now, use mock data
-      const mockRequests: AccessRequest[] = [
+      // Sample access requests
+      const sampleRequests: AccessRequest[] = [
         {
           requestId: 1,
           doctorAddress: account.address,
@@ -59,7 +59,7 @@ export function AccessRequestManager() {
         },
       ];
       
-      setAccessRequests(mockRequests);
+      setAccessRequests(sampleRequests);
     } catch (err) {
       console.error('Error loading access requests:', err);
       setError(err instanceof Error ? err.message : 'Unknown error loading access requests.');
@@ -78,7 +78,7 @@ export function AccessRequestManager() {
       return;
     }
 
-    if (roleData.role !== 'doctor') {
+    if (roleData.role !== 'DOCTOR') {
       setError('Only doctors can request access to patient data.');
       return;
     }
@@ -116,7 +116,7 @@ export function AccessRequestManager() {
       return;
     }
 
-    if (roleData.role !== 'patient') {
+    if (roleData.role !== 'PATIENT') {
       setError('Only patients can approve access requests.');
       return;
     }
@@ -152,7 +152,7 @@ export function AccessRequestManager() {
       return;
     }
 
-    if (roleData.role !== 'patient') {
+    if (roleData.role !== 'PATIENT') {
       setError('Only patients can reject access requests.');
       return;
     }
@@ -238,7 +238,7 @@ export function AccessRequestManager() {
       )}
 
       {/* Request Access Form (for Doctors) */}
-      {roleData.role === 'doctor' && (
+      {roleData.role === 'DOCTOR' && (
         <div className="request-access-form">
           <h4>Request Access to Patient Data</h4>
           <div className="form-group">
@@ -324,7 +324,7 @@ export function AccessRequestManager() {
             </div>
             
             {/* Action Buttons (for Patients) */}
-            {roleData.role === 'patient' && 
+            {roleData.role === 'PATIENT' && 
              request.patientAddress === account.address && 
              request.status === ACCESS_REQUEST_STATUS.PENDING && (
               <div className="request-actions">

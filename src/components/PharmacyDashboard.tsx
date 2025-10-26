@@ -1,16 +1,27 @@
-import React from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
+import { Pill } from 'lucide-react';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 export function PharmacyDashboard() {
   const account = useCurrentAccount();
 
   return (
     <div className="dashboard pharmacy-dashboard">
-      <div className="dashboard-header">
-        <h2>💊 Pharmacy Dashboard</h2>
-        <p>Welcome, Pharmacist {account?.address?.slice(0, 8)}...</p>
-        <p className="role-description">Rol Yetkisi: Sadece hastanın reçetelerini okuyabilir.</p>
-      </div>
+      <Card className="dashboard-header">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Pill className="w-6 h-6" />
+            Pharmacy Dashboard
+          </CardTitle>
+          <CardDescription>
+            Welcome, Pharmacist {account?.address?.slice(0, 8)}...
+          </CardDescription>
+          <Badge variant="outline" className="w-fit">
+            Rol Yetkisi: Sadece hastanın reçetelerini okuyabilir.
+          </Badge>
+        </CardHeader>
+      </Card>
 
       <div className="dashboard-content">
         <div className="dashboard-section">

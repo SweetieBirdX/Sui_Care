@@ -118,9 +118,7 @@ export const PRODUCTION_CONFIG = {
     
     // Seal Configuration - Use Testnet by default
     SEAL_PACKAGE_ID: import.meta.env.VITE_SEAL_PACKAGE_ID || PRODUCTION_CONFIG.SEAL_CONFIG.packageId,
-    SEAL_KEY_SERVERS: import.meta.env.VITE_SEAL_KEY_SERVERS ? 
-      JSON.parse(import.meta.env.VITE_SEAL_KEY_SERVERS) : 
-      PRODUCTION_CONFIG.SEAL_CONFIG.keyServers,
+    SEAL_KEY_SERVERS: PRODUCTION_CONFIG.SEAL_CONFIG.keyServers,
     
     // Policy Configuration
     POLICY_PACKAGE_ID: import.meta.env.VITE_POLICY_PACKAGE_ID || PRODUCTION_CONFIG.POLICY_CONFIG.packageId,

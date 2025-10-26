@@ -44,7 +44,7 @@ export function AuditTrailViewer() {
     try {
       let response: AuditTrailResponse;
       
-      if (roleData.role === 'patient') {
+      if (roleData.role === 'PATIENT') {
         // Patients see their own audit trail
         response = await auditTrailService.getAuditTrailForPatient(account.address, filter);
       } else {
@@ -67,7 +67,7 @@ export function AuditTrailViewer() {
 
   // Load audit statistics
   const loadAuditStatistics = useCallback(async () => {
-    if (!account?.address || roleData?.role !== 'patient') {
+    if (!account?.address || roleData?.role !== 'PATIENT') {
       return;
     }
     
@@ -167,7 +167,7 @@ export function AuditTrailViewer() {
       )}
 
       {/* Audit Statistics (for Patients) */}
-      {roleData.role === 'patient' && (
+      {roleData.role === 'PATIENT' && (
         <div className="audit-statistics">
           <h4>Access Statistics</h4>
           <div className="stats-grid">

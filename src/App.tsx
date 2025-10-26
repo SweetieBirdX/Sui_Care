@@ -4,6 +4,7 @@ import { NetworkSelector } from './components/NetworkSelector';
 import { RoleBasedRouter } from './components/RoleBasedRouter';
 import { logProductionStatus } from './config/production';
 import { useEffect } from 'react';
+import { Stethoscope } from 'lucide-react';
 import './App.css';
 
 function App() {
@@ -16,11 +17,20 @@ function App() {
     <AppProviders>
       <div className="app">
         <header className="app-header">
-          <h1>Sui Care dApp</h1>
-          <p>Decentralized Healthcare Management System</p>
-          <div className="header-controls">
-            <WalletConnectButton />
-            <NetworkSelector />
+          <div className="header-content">
+                    <div className="app-logo">
+                      <div className="logo-icon">
+                        <Stethoscope className="w-8 h-8 text-white" />
+                      </div>
+                      <div className="logo-text">
+                        <h1>Sui Care</h1>
+                        <p>Decentralized Healthcare Management</p>
+                      </div>
+                    </div>
+            <div className="header-controls">
+              <WalletConnectButton />
+              <NetworkSelector />
+            </div>
           </div>
         </header>
         
