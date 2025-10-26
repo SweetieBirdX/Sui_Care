@@ -159,6 +159,413 @@
   word-break: break-all;
 }
 
+/* Role Selection Styles */
+.role-selection {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 2rem;
+}
+
+.role-selection-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.role-selection-header h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.role-selection-header p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.role-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.role-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--role-color, #4ecdc4);
+  transform: translateY(-2px);
+}
+
+.role-card.selected {
+  background: rgba(78, 205, 196, 0.1);
+  border-color: var(--role-color, #4ecdc4);
+  box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+}
+
+.role-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.role-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.role-description {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+  line-height: 1.4;
+}
+
+.selected-indicator {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: var(--role-color, #4ecdc4);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.role-confirmation {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.selected-role-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.selected-role-icon {
+  font-size: 1.5rem;
+}
+
+.selected-role-text {
+  font-weight: 500;
+}
+
+.confirm-role-button {
+  background: #4ecdc4;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0 auto;
+}
+
+.confirm-role-button:hover:not(:disabled) {
+  background: #45b7b8;
+  transform: translateY(-2px);
+}
+
+.confirm-role-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.role-error {
+  margin-bottom: 1rem;
+}
+
+.role-error .error-message {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ff6b6b;
+  font-size: 0.9rem;
+}
+
+.role-error .error-icon {
+  font-size: 1.2rem;
+}
+
+/* Health Data Manager Styles */
+.health-data-manager {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 2rem;
+}
+
+.health-data-header {
+  margin-bottom: 2rem;
+}
+
+.health-data-header h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.health-data-header p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+.health-data-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.data-type-selector {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex: 1;
+  min-width: 300px;
+}
+
+.data-type-selector label {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.data-type-selector select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 0.5rem;
+  color: white;
+  font-size: 0.9rem;
+  min-width: 150px;
+}
+
+.data-type-selector select option {
+  background: #333;
+  color: white;
+}
+
+.create-data-button,
+.refresh-button {
+  background: #4ecdc4;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.create-data-button:hover,
+.refresh-button:hover {
+  background: #45b7b8;
+  transform: translateY(-1px);
+}
+
+.create-data-button:disabled,
+.refresh-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.health-data-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.health-data-item {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.health-data-item:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(78, 205, 196, 0.3);
+}
+
+.data-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.data-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #4ecdc4;
+  text-transform: capitalize;
+}
+
+.data-status {
+  background: rgba(78, 205, 196, 0.2);
+  border: 1px solid rgba(78, 205, 196, 0.4);
+  color: #4ecdc4;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.data-info {
+  margin-bottom: 1rem;
+}
+
+.data-info p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.data-info strong {
+  color: #4ecdc4;
+}
+
+.data-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.view-button,
+.share-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.view-button:hover {
+  background: rgba(78, 205, 196, 0.2);
+  border-color: #4ecdc4;
+}
+
+.share-button:hover {
+  background: rgba(255, 193, 7, 0.2);
+  border-color: #ffc107;
+}
+
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  opacity: 0.7;
+}
+
+.no-data p {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.error-message {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ff6b6b;
+}
+
+.error-icon {
+  font-size: 1.2rem;
+}
+
+/* Responsive Design for Health Data Manager */
+@media (max-width: 768px) {
+  .health-data-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .data-type-selector {
+    flex-direction: column;
+    align-items: stretch;
+    min-width: auto;
+  }
+  
+  .data-type-selector select {
+    min-width: auto;
+  }
+  
+  .data-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .data-actions {
+    flex-direction: column;
+  }
+}
+
 /* KYC Status Styles */
 .kyc-status {
   margin-top: 1rem;
@@ -332,6 +739,19 @@
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 0.8rem;
   word-break: break-all;
+}
+
+.role-badge {
+  background: rgba(78, 205, 196, 0.2);
+  border: 1px solid rgba(78, 205, 196, 0.4);
+  color: #4ecdc4;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .reset-button {
