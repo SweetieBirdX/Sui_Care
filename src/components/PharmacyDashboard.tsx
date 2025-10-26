@@ -1,66 +1,56 @@
 import React from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
-import { useUserRole } from '../hooks/useUserRole';
 
 export function PharmacyDashboard() {
   const account = useCurrentAccount();
-  const { roleData } = useUserRole();
 
   return (
     <div className="dashboard pharmacy-dashboard">
       <div className="dashboard-header">
-        <h2>🏥 Pharmacy Dashboard</h2>
-        <p>Welcome, Pharmacy {account?.address?.slice(0, 8)}...</p>
-        <div className="role-badge pharmacy">PHARMACY</div>
+        <h2>💊 Pharmacy Dashboard</h2>
+        <p>Welcome, Pharmacist {account?.address?.slice(0, 8)}...</p>
       </div>
 
       <div className="dashboard-content">
         <div className="dashboard-section">
-          <h3>Prescription Management</h3>
-          <p>View and manage patient prescriptions with read-only access.</p>
-          <div className="permissions">
-            <div className="permission-item">
-              <span className="permission-icon">📋</span>
-              <span>View prescriptions only</span>
-            </div>
-            <div className="permission-item">
-              <span className="permission-icon">🔍</span>
-              <span>Read medication details</span>
-            </div>
-            <div className="permission-item">
-              <span className="permission-icon">❌</span>
-              <span>Cannot modify patient data</span>
-            </div>
-            <div className="permission-item">
-              <span className="permission-icon">❌</span>
-              <span>Cannot access lab results</span>
+          <h3>📋 Prescriptions</h3>
+          <div className="section-content">
+            <p>View and manage patient prescriptions only</p>
+            <div className="action-buttons">
+              <button className="btn-primary">View Prescriptions</button>
+              <button className="btn-secondary">Search Prescription</button>
             </div>
           </div>
         </div>
 
         <div className="dashboard-section">
-          <h3>Prescription Queue</h3>
-          <p>Current prescriptions awaiting processing.</p>
-          <div className="prescription-list">
-            <div className="prescription-item">
-              <span className="prescription-id">RX-001</span>
-              <span className="prescription-patient">Patient A</span>
-              <span className="prescription-status pending">Pending</span>
-            </div>
-            <div className="prescription-item">
-              <span className="prescription-id">RX-002</span>
-              <span className="prescription-patient">Patient B</span>
-              <span className="prescription-status completed">Completed</span>
+          <h3>💊 Medication Management</h3>
+          <div className="section-content">
+            <p>Manage medication inventory and dispensing</p>
+            <div className="action-buttons">
+              <button className="btn-primary">Inventory</button>
+              <button className="btn-secondary">Dispense Medication</button>
             </div>
           </div>
         </div>
 
         <div className="dashboard-section">
-          <h3>Restrictions Notice</h3>
-          <div className="restriction-notice">
-            <p>⚠️ <strong>Access Limited:</strong> As a pharmacy, you can only view prescription data. 
-            You cannot access patient lab results, medical history, or other sensitive health information.</p>
+          <h3>📊 Prescription Analytics</h3>
+          <div className="section-content">
+            <p>View prescription statistics and trends</p>
+            <div className="action-buttons">
+              <button className="btn-primary">View Analytics</button>
+            </div>
           </div>
+        </div>
+      </div>
+
+      <div className="dashboard-footer">
+        <p className="role-info">
+          <strong>Role:</strong> Pharmacist | <strong>Permissions:</strong> Read prescriptions only, No access to other patient data
+        </p>
+        <div className="restriction-notice">
+          <p>⚠️ <strong>Access Restriction:</strong> You can only view prescriptions. Other patient data (lab results, diagnoses) is not accessible.</p>
         </div>
       </div>
     </div>
