@@ -1,5 +1,6 @@
 import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
 import { useQuery } from '@tanstack/react-query';
+import { KYCStatus } from './KYCStatus';
 
 export function WalletInfo() {
   const account = useCurrentAccount();
@@ -70,6 +71,8 @@ export function WalletInfo() {
           )}
         </div>
       </div>
+      
+      <KYCStatus />
     </div>
   );
 }

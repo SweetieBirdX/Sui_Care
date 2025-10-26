@@ -159,6 +159,229 @@
   word-break: break-all;
 }
 
+/* KYC Status Styles */
+.kyc-status {
+  margin-top: 1rem;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.status-indicator.verified {
+  background: rgba(78, 205, 196, 0.2);
+  border: 1px solid rgba(78, 205, 196, 0.4);
+  color: #4ecdc4;
+}
+
+.status-indicator.not-verified {
+  background: rgba(255, 193, 7, 0.2);
+  border: 1px solid rgba(255, 193, 7, 0.4);
+  color: #ffc107;
+}
+
+.status-indicator.expired {
+  background: rgba(255, 107, 107, 0.2);
+  border: 1px solid rgba(255, 107, 107, 0.4);
+  color: #ff6b6b;
+}
+
+.status-icon {
+  font-size: 1rem;
+}
+
+.kyc-details {
+  margin-top: 0.25rem;
+  opacity: 0.8;
+  font-size: 0.8rem;
+}
+
+/* KYC Verification Styles */
+.kyc-verification {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 2rem;
+}
+
+.kyc-verification h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kyc-idle p {
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.kyc-description {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 1.5rem !important;
+}
+
+.verify-button,
+.retry-button {
+  background: #4ecdc4;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.verify-button:hover,
+.retry-button:hover {
+  background: #45b7b8;
+  transform: translateY(-2px);
+}
+
+.kyc-verifying {
+  text-align: center;
+}
+
+.verification-spinner {
+  margin-bottom: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #4ecdc4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.verification-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}
+
+.kyc-verified {
+  text-align: center;
+}
+
+.verification-success {
+  margin-bottom: 1.5rem;
+}
+
+.success-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.verification-success h4 {
+  margin: 0;
+  color: #4ecdc4;
+  font-size: 1.3rem;
+}
+
+.verification-details {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-item:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.status-verified {
+  color: #4ecdc4;
+  font-weight: 600;
+}
+
+.proof-hash {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+.reset-button {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.reset-button:hover {
+  background: #ff5252;
+  transform: translateY(-1px);
+}
+
+.kyc-failed,
+.kyc-expired {
+  text-align: center;
+}
+
+.verification-error,
+.verification-expired {
+  margin-bottom: 1.5rem;
+}
+
+.error-icon,
+.expired-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.verification-error h4,
+.verification-expired h4 {
+  margin: 0;
+  color: #ff6b6b;
+  font-size: 1.3rem;
+}
+
+.error-message {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  color: #ff6b6b;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-main {
@@ -181,5 +404,16 @@
   
   .network-buttons {
     flex-direction: column;
+  }
+  
+  .kyc-verification {
+    padding: 1.5rem;
+    margin-top: 1rem;
+  }
+  
+  .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
   }
 }

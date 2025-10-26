@@ -2,6 +2,7 @@ import { AppProviders } from './providers/AppProviders';
 import { WalletConnectButton } from './components/WalletConnectButton';
 import { NetworkSelector } from './components/NetworkSelector';
 import { WalletInfo } from './components/WalletInfo';
+import { KYCVerification } from './components/KYCVerification';
 import './App.css';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
           
           <div className="wallet-info-section">
             <WalletInfo />
+            <KYCVerification />
           </div>
         </main>
       </div>
