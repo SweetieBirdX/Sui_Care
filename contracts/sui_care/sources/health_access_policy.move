@@ -455,3 +455,288 @@ module sui_care::health_access_policy {
     public fun get_permission_delete(): u8 { PERMISSION_DELETE }
     public fun get_permission_share(): u8 { PERMISSION_SHARE }
 }
+
+// ============================================================================
+// ACCESS REQUEST AND APPROVAL MODULE
+// ============================================================================
+
+module sui_care::access_control {
+    use sui::object::{Self, UID, ID};
+    use sui::tx_context::{Self, TxContext};
+    use sui::transfer;
+    use sui::event;
+    use sui::clock::{Self, Clock};
+    use sui::option::{Self, Option};
+    use sui_care::health_access_policy::{Self, HealthAccessPolicy};
+
+    // --- Constants ---
+    const EAccessRequestNotFound: u64 = 10;
+    const EAccessRequestExpired: u64 = 11;
+    const EAccessRequestAlreadyApproved: u64 = 12;
+    const EAccessRequestNotApproved: u64 = 13;
+    const EInvalidRequestor: u64 = 14;
+    const EInvalidApprover: u64 = 15;
+    const ERequestExpired: u64 = 16;
+    const EInsufficientPermission: u64 = 17;
+
+    // --- Access Request Status ---
+    const STATUS_PENDING: u8 = 1;
+    const STATUS_APPROVED: u8 = 2;
+    const STATUS_REJECTED: u8 = 3;
+    const STATUS_EXPIRED: u8 = 4;
+
+    // --- Structs ---
+    struct AccessRequest has key, store {
+        id: UID,
+        request_id: u64,
+        doctor_address: address,
+        patient_address: address,
+        data_object_id: ID, // Walrus blob ID or Sui object ID
+        expiry_time: u64, // Epoch timestamp
+        status: u8, // PENDING, APPROVED, REJECTED, EXPIRED
+        created_at: u64,
+        approved_at: Option<u64>,
+        policy_id: ID, // Reference to HealthAccessPolicy
+    }
+
+    struct AccessControlManager has key {
+        id: UID,
+        next_request_id: u64,
+        policy: ID, // Reference to HealthAccessPolicy
+    }
+
+    // --- Events ---
+    struct AccessRequestCreatedEvent has Copy, Drop {
+        request_id: u64,
+        doctor_address: address,
+        patient_address: address,
+        data_object_id: ID,
+        expiry_time: u64,
+    }
+
+    struct AccessRequestApprovedEvent has Copy, Drop {
+        request_id: u64,
+        doctor_address: address,
+        patient_address: address,
+        data_object_id: ID,
+        approved_at: u64,
+    }
+
+    struct AccessRequestRejectedEvent has Copy, Drop {
+        request_id: u64,
+        doctor_address: address,
+        patient_address: address,
+        data_object_id: ID,
+        rejected_at: u64,
+    }
+
+    struct AccessAuditEvent has Copy, Drop {
+        accessor_address: address,
+        patient_address: address,
+        data_object_id: ID,
+        transaction_type: u8, // READ, WRITE, DELETE
+        timestamp: u64,
+        request_id: u64,
+    }
+
+    // --- Initialization ---
+    fun init(ctx: &mut TxContext) {
+        let access_control = AccessControlManager {
+            id: object::new(ctx),
+            next_request_id: 1,
+            policy: object::id_from_address(@sui_care), // Will be set after policy creation
+        };
+
+        transfer::share_object(access_control);
+    }
+
+    // --- Public Functions ---
+
+    /// Set the policy reference (called after HealthAccessPolicy is created)
+    public entry fun set_policy_reference(
+        access_control: &mut AccessControlManager,
+        policy_id: ID,
+        ctx: &mut TxContext
+    ) {
+        access_control.policy = policy_id;
+    }
+
+    /// Request access to patient data
+    public entry fun request_access(
+        access_control: &mut AccessControlManager,
+        policy: &HealthAccessPolicy,
+        doctor_address: address,
+        patient_address: address,
+        data_object_id: ID,
+        lifetime_epochs: u64,
+        clock: &Clock,
+        ctx: &mut TxContext
+    ) {
+        // Verify doctor has permission to request access
+        let (has_permission, reason) = health_access_policy::check_permission(
+            policy,
+            doctor_address,
+            health_access_policy::ROLE_DOCTOR,
+            health_access_policy::DATA_GENERAL_RECORD, // Generic data type for access requests
+            health_access_policy::PERMISSION_READ
+        );
+        assert!(has_permission, EInsufficientPermission);
+
+        // Prevent self-authorization
+        assert!(doctor_address != patient_address, EInvalidRequestor);
+
+        let request_id = access_control.next_request_id;
+        access_control.next_request_id = access_control.next_request_id + 1;
+
+        let current_time = clock::timestamp_ms(clock);
+        let expiry_time = current_time + (lifetime_epochs * 24 * 60 * 60 * 1000); // Convert epochs to milliseconds
+
+        let access_request = AccessRequest {
+            id: object::new(ctx),
+            request_id,
+            doctor_address,
+            patient_address,
+            data_object_id,
+            expiry_time,
+            status: STATUS_PENDING,
+            created_at: current_time,
+            approved_at: option::none(),
+            policy_id: object::id(policy),
+        };
+
+        // Emit event
+        event::emit(AccessRequestCreatedEvent {
+            request_id,
+            doctor_address,
+            patient_address,
+            data_object_id,
+            expiry_time,
+        });
+
+        // Store the request (in production, this would be stored on-chain)
+        // For now, we'll transfer it to the patient for them to approve
+        transfer::public_transfer(access_request, patient_address);
+    }
+
+    /// Patient approves access request
+    public entry fun grant_access(
+        access_request: &mut AccessRequest,
+        policy: &HealthAccessPolicy,
+        patient_signer: &mut TxContext,
+        clock: &Clock,
+    ) {
+        let patient_address = tx_context::sender(patient_signer);
+        
+        // Verify the patient is the correct approver
+        assert!(patient_address == access_request.patient_address, EInvalidApprover);
+        
+        // Check if request is still valid
+        let current_time = clock::timestamp_ms(clock);
+        assert!(current_time <= access_request.expiry_time, ERequestExpired);
+        
+        // Check if already processed
+        assert!(access_request.status == STATUS_PENDING, EAccessRequestAlreadyApproved);
+
+        // Update request status
+        access_request.status = STATUS_APPROVED;
+        access_request.approved_at = option::some(current_time);
+
+        // Emit approval event
+        event::emit(AccessRequestApprovedEvent {
+            request_id: access_request.request_id,
+            doctor_address: access_request.doctor_address,
+            patient_address: access_request.patient_address,
+            data_object_id: access_request.data_object_id,
+            approved_at: current_time,
+        });
+
+        // Emit audit event for access granted
+        event::emit(AccessAuditEvent {
+            accessor_address: access_request.doctor_address,
+            patient_address: access_request.patient_address,
+            data_object_id: access_request.data_object_id,
+            transaction_type: health_access_policy::PERMISSION_READ,
+            timestamp: current_time,
+            request_id: access_request.request_id,
+        });
+    }
+
+    /// Patient rejects access request
+    public entry fun reject_access(
+        access_request: &mut AccessRequest,
+        patient_signer: &mut TxContext,
+        clock: &Clock,
+    ) {
+        let patient_address = tx_context::sender(patient_signer);
+        
+        // Verify the patient is the correct approver
+        assert!(patient_address == access_request.patient_address, EInvalidApprover);
+        
+        // Check if request is still valid
+        let current_time = clock::timestamp_ms(clock);
+        assert!(current_time <= access_request.expiry_time, ERequestExpired);
+        
+        // Check if already processed
+        assert!(access_request.status == STATUS_PENDING, EAccessRequestAlreadyApproved);
+
+        // Update request status
+        access_request.status = STATUS_REJECTED;
+
+        // Emit rejection event
+        event::emit(AccessRequestRejectedEvent {
+            request_id: access_request.request_id,
+            doctor_address: access_request.doctor_address,
+            patient_address: access_request.patient_address,
+            data_object_id: access_request.data_object_id,
+            rejected_at: current_time,
+        });
+    }
+
+    /// Check if access is approved for a specific request
+    public fun is_access_approved(access_request: &AccessRequest): bool {
+        access_request.status == STATUS_APPROVED
+    }
+
+    /// Get access request details
+    public fun get_access_request_details(access_request: &AccessRequest): (u64, address, address, ID, u8, u64) {
+        (
+            access_request.request_id,
+            access_request.doctor_address,
+            access_request.patient_address,
+            access_request.data_object_id,
+            access_request.status,
+            access_request.created_at
+        )
+    }
+
+    /// Record data access audit (called when data is actually accessed)
+    public entry fun record_data_access(
+        access_request: &AccessRequest,
+        transaction_type: u8,
+        clock: &Clock,
+    ) {
+        // Verify access is approved
+        assert!(access_request.status == STATUS_APPROVED, EAccessRequestNotApproved);
+        
+        let current_time = clock::timestamp_ms(clock);
+        
+        // Emit audit event for actual data access
+        event::emit(AccessAuditEvent {
+            accessor_address: access_request.doctor_address,
+            patient_address: access_request.patient_address,
+            data_object_id: access_request.data_object_id,
+            transaction_type,
+            timestamp: current_time,
+            request_id: access_request.request_id,
+        });
+    }
+
+    // --- Getters ---
+    public fun get_next_request_id(access_control: &AccessControlManager): u64 {
+        access_control.next_request_id
+    }
+
+    public fun get_policy_id(access_control: &AccessControlManager): ID {
+        access_control.policy
+    }
+}

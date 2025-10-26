@@ -4,6 +4,8 @@ import { NetworkSelector } from './components/NetworkSelector';
 import { WalletInfo } from './components/WalletInfo';
 import { KYCVerification } from './components/KYCVerification';
 import { HealthDataManager } from './components/HealthDataManager';
+import { AccessRequestManager } from './components/AccessRequestManager';
+import { AuditTrailViewer } from './components/AuditTrailViewer';
 import { logProductionStatus } from './config/production';
 import { useEffect } from 'react';
 import './App.css';
@@ -28,11 +30,13 @@ function App() {
             <NetworkSelector />
           </div>
           
-          <div className="wallet-info-section">
-            <WalletInfo />
-            <KYCVerification />
-            <HealthDataManager />
-          </div>
+                  <div className="wallet-info-section">
+                    <WalletInfo />
+                    <KYCVerification />
+                    <HealthDataManager />
+                    <AccessRequestManager />
+                    <AuditTrailViewer />
+                  </div>
         </main>
       </div>
     </AppProviders>
