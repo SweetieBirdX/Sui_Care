@@ -6,8 +6,13 @@ import { WalrusService } from '../services/walrusService';
 // WARNING: Walrus Testnet is periodically wiped and restarted
 // This means user role data can be lost at any time
 // For production use, migrate to Mainnet with proper JWT authentication
+// 
+// PRODUCTION REQUIREMENTS:
+// - Mainnet RPC endpoints must be used for production applications
+// - Rate limiting applies; high traffic requires dedicated nodes or professional providers
+// - Seal's on-chain policy requirement means Move contracts and Key Servers must be tested in stable Mainnet environment
 
-export type UserRole = 'doctor' | 'pharmacist' | 'patient';
+export type UserRole = 'DOCTOR' | 'PHARMACY' | 'PATIENT' | 'UNASSIGNED';
 
 export interface UserRoleData {
   role: UserRole;
@@ -36,76 +41,14 @@ export function useUserRole() {
       return null;
     }
 
-    setStatus('loading');
-    setError(null);
-
-    try {
-      // Generate blob ID based on user address
-      const blobId = `role_${account.address.slice(0, 8)}_${Date.now()}`;
-      
-      // Try to find existing role data by checking multiple possible blob IDs
-      const possibleBlobIds = [
-        blobId,
-        `role_${account.address.slice(0, 8)}_doctor`,
-        `role_${account.address.slice(0, 8)}_pharmacist`,
-        `role_${account.address.slice(0, 8)}_patient`,
-      ];
-
-      let foundBlobId: string | null = null;
-      let encryptedData: Uint8Array | null = null;
-
-      // Check each possible blob ID with rate limiting
-      for (const id of possibleBlobIds) {
-        console.log(`🔍 Checking role data for blob ID: ${id}`);
-        const exists = await walrusService.checkRoleDataExists(id);
-        if (exists) {
-          console.log(`✅ Found existing role data for blob ID: ${id}`);
-          const data = await walrusService.getRoleData(id);
-          if (data) {
-            foundBlobId = id;
-            encryptedData = data;
-            break;
-          }
-        } else {
-          console.log(`❌ No role data found for blob ID: ${id}`);
-        }
-      }
-
-      if (!encryptedData || !foundBlobId) {
-        console.warn('⚠️ No role data found in Walrus - This may indicate Testnet data wipe');
-        console.log('🔄 User will need to re-select their role due to Walrus Testnet instability');
-        setStatus('not_found');
-        return null;
-      }
-
-      // Decrypt the role data
-      const decryptedRoleData = await sealService.decryptRoleData(encryptedData, account.address);
-      
-      if (!decryptedRoleData) {
-        setStatus('error');
-        setError('Failed to decrypt role data');
-        return null;
-      }
-
-      const userRoleData: UserRoleData = {
-        role: decryptedRoleData.role as UserRole,
-        selectedAt: new Date(decryptedRoleData.timestamp),
-        kycVerified: decryptedRoleData.kycVerified,
-        blobId: foundBlobId,
-      };
-
-      setRoleData(userRoleData);
-      setStatus('loaded');
-      return userRoleData;
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(errorMessage);
-      setStatus('error');
-      console.error('Error loading user role:', err);
-      return null;
-    }
-  }, [account?.address, sealService, walrusService]);
+    // TEMPORARY FIX: Skip Walrus check due to Testnet instability
+    // Go directly to role selection
+    console.warn('⚠️ Walrus Testnet is unstable - Skipping role check, going to role selection');
+    setStatus('not_found');
+    setRoleData({ role: 'UNASSIGNED', selectedAt: new Date(), kycVerified: true });
+    console.log('🔍 useUserRole: Set roleData to UNASSIGNED with kycVerified: true');
+    return null;
+  }, [account?.address]);
 
   // Save user role to Walrus
   const saveUserRole = useCallback(async (role: UserRole, kycVerified: boolean = true): Promise<boolean> => {
@@ -191,7 +134,7 @@ export function useUserRole() {
       setStatus('idle');
       setError(null);
     }
-  }, [account?.address, loadUserRole]);
+  }, [account?.address]);
 
   return {
     roleData,

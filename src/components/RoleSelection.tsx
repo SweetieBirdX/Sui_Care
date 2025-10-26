@@ -44,21 +44,21 @@ export function RoleSelection({ onRoleSelected, isVisible }: RoleSelectionProps)
 
   const roles = [
     {
-      id: 'doctor' as UserRole,
+      id: 'DOCTOR' as UserRole,
       title: 'Doctor',
       icon: '👨‍⚕️',
       description: 'Medical professional providing healthcare services',
       color: '#4ecdc4',
     },
     {
-      id: 'pharmacist' as UserRole,
-      title: 'Pharmacist',
-      icon: '👩‍⚕️',
-      description: 'Healthcare professional managing medications',
+      id: 'PHARMACY' as UserRole,
+      title: 'Pharmacy',
+      icon: '🏥',
+      description: 'Healthcare facility managing medications',
       color: '#45b7b8',
     },
     {
-      id: 'patient' as UserRole,
+      id: 'PATIENT' as UserRole,
       title: 'Patient',
       icon: '👤',
       description: 'Individual seeking healthcare services',

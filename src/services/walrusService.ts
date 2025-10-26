@@ -21,7 +21,7 @@ export class WalrusService {
         // Add other Mainnet publishers if available
       ];
       // JWT token for Mainnet authentication
-      this.apiKey = (typeof process !== 'undefined' && process.env?.VITE_WALRUS_JWT_TOKEN) || undefined;
+      this.apiKey = ENV_VARS.WALRUS_JWT_TOKEN;
       
       if (!this.apiKey) {
         console.warn('⚠️ No JWT token provided for Walrus Mainnet. Authentication may fail.');
@@ -30,13 +30,18 @@ export class WalrusService {
       // Testnet configuration with proxy for development
       this.baseUrl = '/walrus-api'; // Vite proxy endpoint
       
-      // WARNING: Walrus Testnet is periodically wiped and restarted
+      // WARNING: Walrus Testnet is unstable and periodically wiped
       // This means data can be lost at any time - DO NOT use for production
       // For stable development, consider migrating to Mainnet
+      //
+      // PRODUCTION REQUIREMENTS:
+      // - Mainnet RPC endpoints must be used for production applications
+      // - Rate limiting applies; high traffic requires dedicated nodes or professional providers
+      // - Seal's on-chain policy requirement means Move contracts and Key Servers must be tested in stable Mainnet environment
       this.fallbackUrls = [
         '/walrus-api', // Primary proxy endpoint
+        '/walrus-testnet', // Alternative proxy endpoint
         '/walrus-alt', // Alternative proxy endpoint
-        '/walrus-http', // HTTP proxy endpoint
         // Direct URLs as last resort (may cause CORS issues)
         'https://publisher.walrus-testnet.h2o-nodes.com',
         'https://publisher.walrus-testnet.walrus.space/v1',
@@ -228,8 +233,19 @@ export class WalrusService {
           headers,
         });
 
+        // Testnet Kararsızlıklarını ve Veri Kaybını Ele Al
         if (response.status === 404) {
-          console.warn(`⚠️ Blob not found (404): ${blobId} - This may indicate Walrus Testnet data wipe`);
+          console.warn(`⚠️ Blob not found (404): ${blobId} - Data may have been wiped from Walrus Testnet`);
+          return false;
+        }
+
+        if (response.status === 502) {
+          console.warn(`⚠️ Bad Gateway (502): ${blobId} - Walrus Testnet service is unstable`);
+          return false;
+        }
+
+        if (response.status === 503) {
+          console.warn(`⚠️ Service Unavailable (503): ${blobId} - Walrus Testnet is temporarily down`);
           return false;
         }
 
@@ -238,14 +254,21 @@ export class WalrusService {
         }
 
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          console.warn(`⚠️ HTTP Error ${response.status}: ${response.statusText} - Walrus Testnet instability`);
+          return false;
         }
 
         return response.ok;
       }, 'checkRoleDataExists');
     } catch (error) {
       console.error('❌ Role data check failed on all Walrus Publishers:', error);
-      // Return false to indicate no role data found, but log the comprehensive error
+      
+      // Testnet kararsızlığı durumunda kullanıcıyı rol seçimine yönlendir
+      if (this.network === 'testnet') {
+        console.log('🔄 Walrus Testnet is unstable. User will be redirected to role selection.');
+      }
+      
+      // Return false to indicate no role data found, triggering role selection
       return false;
     }
   }

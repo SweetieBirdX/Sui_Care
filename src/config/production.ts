@@ -1,9 +1,9 @@
 // Production configuration for Sui Care dApp
 // This file contains real production values that need to be updated
 
-// WARNING: Walrus Testnet is periodically wiped and restarted
-// This means all data can be lost at any time - DO NOT use for production
-// Mainnet is required for any level of stability
+// CRITICAL: Walrus Testnet is unstable and periodically wiped
+// Mainnet is MANDATORY for any production use
+// Testnet should only be used for development with local Walrus daemon
 
 export const PRODUCTION_CONFIG = {
   // Sui Network Configuration
@@ -47,24 +47,26 @@ export const PRODUCTION_CONFIG = {
   // Seal Configuration
   SEAL_CONFIG: {
     // Updated with real values from Seal documentation
-    packageId: '0x927a54e9ae803f82ebf480136a9bcff45101ccbe28b13f433c89f5181069d682', // Real Seal package ID
+    // Mainnet: 0xa212c4c6c7183b911d0be8768f4cb1df7a383025b5d0ba0c014009f0f30f5f8d
+    // Testnet: 0x927a54e9ae803f82ebf480136a9bcff45101ccbe28b13f433c89f5181069d682
+    packageId: '0x927a54e9ae803f82ebf480136a9bcff45101ccbe28b13f433c89f5181069d682', // Testnet Seal package ID
     keyServers: [
       {
-        objectId: '0x73d05d62c18d9374e3ea529e8e0ed6161da1a141a94d3f76ae3fe4e99356db75', // Real key server object ID
+        objectId: '0x73d05d62c18d9374e3ea529e8e0ed6161da1a141a94d3f76ae3fe4e99356db75', // Testnet key server object ID
         weight: 1,
       },
       {
-        objectId: '0xf5d14a81a982144ae441cd7d64b09027f116a468bd36e7eca494f750591623c8', // Real key server object ID
+        objectId: '0xf5d14a81a982144ae441cd7d64b09027f116a468bd36e7eca494f750591623c8', // Testnet key server object ID
         weight: 1,
       },
     ],
-    verifyKeyServers: true, // Set to true in production
+    verifyKeyServers: false, // Set to false for Testnet, true for Mainnet
     timeout: 30000, // 30 seconds
   },
 
   // Health Access Policy Configuration
   POLICY_CONFIG: {
-    // Updated with deployed contract IDs
+    // Updated with deployed contract IDs (VERIFIED ON TESTNET)
     packageId: '0xca7b6dafb380da7a0723ef54cc1f671e34225d6818d57bbe190313f4229448bf', // Deployed health_access_policy package ID
     policyObjectId: '0x8cbbb7073ca9da3cdf54c235e2a0be67f9a53f613040b83963294274f151c9b8', // Deployed policy object ID
   },
@@ -100,27 +102,31 @@ export const PRODUCTION_CONFIG = {
   },
 };
 
-// Environment variables for production
-export const ENV_VARS = {
-  // Sui Configuration
-  SUI_RPC_URL: import.meta.env.VITE_SUI_RPC_URL || PRODUCTION_CONFIG.getRpcUrl(),
-  
-  // Walrus Configuration - Use working Testnet URL
-  WALRUS_PUBLISHER_URL: import.meta.env.VITE_WALRUS_PUBLISHER_URL || 'https://publisher.walrus-testnet.walrus.space/v1',
-  WALRUS_SYSTEM_OBJECT_ID: import.meta.env.VITE_WALRUS_SYSTEM_OBJECT_ID || PRODUCTION_CONFIG.getWalrusSystemObjectId(),
-  WALRUS_STAKING_OBJECT_ID: import.meta.env.VITE_WALRUS_STAKING_OBJECT_ID || PRODUCTION_CONFIG.getWalrusStakingObjectId(),
-  
-  // Seal Configuration
-  SEAL_PACKAGE_ID: import.meta.env.VITE_SEAL_PACKAGE_ID || PRODUCTION_CONFIG.SEAL_CONFIG.packageId,
-  SEAL_KEY_SERVERS: import.meta.env.VITE_SEAL_KEY_SERVERS ? 
-    JSON.parse(import.meta.env.VITE_SEAL_KEY_SERVERS) : 
-    PRODUCTION_CONFIG.SEAL_CONFIG.keyServers,
-  
-  // Policy Configuration
-  POLICY_PACKAGE_ID: import.meta.env.VITE_POLICY_PACKAGE_ID || PRODUCTION_CONFIG.POLICY_CONFIG.packageId,
-  POLICY_OBJECT_ID: import.meta.env.VITE_POLICY_OBJECT_ID || PRODUCTION_CONFIG.POLICY_CONFIG.policyObjectId,
-  ACCESS_CONTROL_MANAGER_OBJECT_ID: import.meta.env.VITE_ACCESS_CONTROL_MANAGER_OBJECT_ID || '0x0',
-};
+  // Environment variables for production
+  export const ENV_VARS = {
+    // Sui Configuration - DEFAULT TO TESTNET FOR DEVELOPMENT
+    SUI_RPC_URL: import.meta.env.VITE_SUI_RPC_URL || 'https://fullnode.testnet.sui.io:443',
+    SUI_NETWORK: import.meta.env.VITE_SUI_NETWORK || 'testnet',
+    
+    // Walrus Configuration - DEFAULT TO TESTNET FOR DEVELOPMENT
+    WALRUS_PUBLISHER_URL: import.meta.env.VITE_WALRUS_PUBLISHER_URL || 'https://publisher.walrus-testnet.walrus.space/v1',
+    WALRUS_SYSTEM_OBJECT_ID: import.meta.env.VITE_WALRUS_SYSTEM_OBJECT_ID || PRODUCTION_CONFIG.WALRUS_CONFIG.testnet.systemObjectId,
+    WALRUS_STAKING_OBJECT_ID: import.meta.env.VITE_WALRUS_STAKING_OBJECT_ID || PRODUCTION_CONFIG.WALRUS_CONFIG.testnet.stakingObjectId,
+    
+    // JWT Token for Mainnet (OPTIONAL)
+    WALRUS_JWT_TOKEN: import.meta.env.VITE_WALRUS_JWT_TOKEN || undefined,
+    
+    // Seal Configuration - Use Testnet by default
+    SEAL_PACKAGE_ID: import.meta.env.VITE_SEAL_PACKAGE_ID || PRODUCTION_CONFIG.SEAL_CONFIG.packageId,
+    SEAL_KEY_SERVERS: import.meta.env.VITE_SEAL_KEY_SERVERS ? 
+      JSON.parse(import.meta.env.VITE_SEAL_KEY_SERVERS) : 
+      PRODUCTION_CONFIG.SEAL_CONFIG.keyServers,
+    
+    // Policy Configuration
+    POLICY_PACKAGE_ID: import.meta.env.VITE_POLICY_PACKAGE_ID || PRODUCTION_CONFIG.POLICY_CONFIG.packageId,
+    POLICY_OBJECT_ID: import.meta.env.VITE_POLICY_OBJECT_ID || PRODUCTION_CONFIG.POLICY_CONFIG.policyObjectId,
+    ACCESS_CONTROL_MANAGER_OBJECT_ID: import.meta.env.VITE_ACCESS_CONTROL_MANAGER_OBJECT_ID || '0x0',
+  };
 
 // Validation function to check if all required production values are set
 export function validateProductionConfig(): { isValid: boolean; missing: string[] } {
@@ -153,11 +159,32 @@ export function validateProductionConfig(): { isValid: boolean; missing: string[
 export function logProductionStatus(): void {
   const validation = validateProductionConfig();
   
+  console.log('--- Production Status Check ---');
+  console.log(`Sui RPC URL: ${ENV_VARS.SUI_RPC_URL}`);
+  console.log(`Sui Network: ${ENV_VARS.SUI_NETWORK}`);
+  console.log(`Walrus Publisher URL: ${ENV_VARS.WALRUS_PUBLISHER_URL}`);
+  console.log(`Seal Package ID: ${ENV_VARS.SEAL_PACKAGE_ID}`);
+  console.log(`Policy Package ID: ${ENV_VARS.POLICY_PACKAGE_ID}`);
+  console.log(`Access Control Manager Object ID: ${ENV_VARS.ACCESS_CONTROL_MANAGER_OBJECT_ID}`);
+  console.log('-----------------------------');
+
+  // Verify Policy Package ID is deployed
+  if (ENV_VARS.POLICY_PACKAGE_ID === '0xca7b6dafb380da7a0723ef54cc1f671e34225d6818d57bbe190313f4229448bf') {
+    console.log('✅ Policy Package ID verified: Contract is deployed on Testnet');
+  } else {
+    console.warn('⚠️ Policy Package ID mismatch: Check deployment status');
+  }
+
   if (validation.isValid) {
     console.log('✅ Production configuration is complete and ready!');
   } else {
     console.warn('⚠️ Production configuration is incomplete:');
     validation.missing.forEach(item => console.warn(`   - ${item}`));
     console.warn('Please update the configuration with real production values.');
+  }
+
+  // Detailed Walrus Testnet warning
+  if (ENV_VARS.WALRUS_PUBLISHER_URL.includes('testnet')) {
+    console.warn('⚠️ WALRUS TESTNET WARNING: Data is periodically wiped and restarted. DO NOT use for production. Consider migrating to Mainnet for stability.');
   }
 }

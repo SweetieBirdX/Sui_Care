@@ -20,17 +20,38 @@ export class SealService {
     this.sealClient = new SealClient({
       suiClient: suiClient as any, // Cast to SealCompatibleClient
       serverConfigs: ENV_VARS.SEAL_KEY_SERVERS, // Real key server object IDs from environment
-      verifyKeyServers: false, // Set to true in production
+      verifyKeyServers: false, // Set to false for Testnet, true for Mainnet
       timeout: 30000, // 30 seconds timeout
     });
     
     // Package ID for Seal protocol - using production configuration
     this.packageId = ENV_VARS.SEAL_PACKAGE_ID;
+    
+    console.log('🔍 SealService initialized with Testnet configuration:', {
+      packageId: this.packageId,
+      keyServers: ENV_VARS.SEAL_KEY_SERVERS,
+      verifyKeyServers: false,
+      network: 'testnet'
+    });
   }
 
   // Encrypt role data using real Seal SDK
   async encryptRoleData(roleData: RoleMetadata, userAddress: string): Promise<Uint8Array> {
     try {
+      // Get Policy Package ID from environment
+      const POLICY_PACKAGE_ID = ENV_VARS.POLICY_PACKAGE_ID;
+      
+      if (!POLICY_PACKAGE_ID || POLICY_PACKAGE_ID === '0x0') {
+        throw new Error("POLICY_PACKAGE_ID is missing or invalid in configuration. Please check your .env file or production.ts");
+      }
+
+      console.log('🔍 Encrypting role data with Seal:', {
+        sealPackageId: this.packageId,
+        policyPackageId: POLICY_PACKAGE_ID,
+        userAddress,
+        role: roleData.role
+      });
+
       // Convert role data to bytes
       const roleDataString = JSON.stringify(roleData);
       const dataBytes = new TextEncoder().encode(roleDataString);
@@ -41,24 +62,39 @@ export class SealService {
         allowed_roles: [roleData.role],
         kyc_required: true,
         timestamp: roleData.timestamp,
+        policy_package_id: POLICY_PACKAGE_ID, // Include policy package ID in AAD
       }));
 
-      // Encrypt using Seal SDK
+      // Encrypt using Seal SDK with correct package ID
       const result = await this.sealClient.encrypt({
         kemType: 0, // KemType.BonehFranklinBLS12381DemCCA
         demType: DemType.AesGcm256, // AES-256-GCM for DEM
         threshold: 1, // Threshold for TSS encryption
-        packageId: this.packageId,
+        packageId: this.packageId, // Seal package ID
         id: userAddress, // Identity to encrypt under
         data: dataBytes,
-        aad: aad, // Additional authenticated data
+        aad: aad, // Additional authenticated data with policy info
       });
 
+      console.log('✅ Role data encrypted successfully with Seal');
       // Return the encrypted object (contains metadata and encrypted data)
       return result.encryptedObject;
     } catch (error) {
-      console.error('Error encrypting role data with Seal:', error);
-      throw new Error('Failed to encrypt role data with Seal');
+      console.error('❌ Error encrypting role data with Seal:', error);
+      
+      // Check for specific error types
+      if (error instanceof Error) {
+        if (error.message.includes('InvalidPackageError')) {
+          console.error('❌ InvalidPackageError: Check package ID configuration');
+          console.error('Seal Package ID:', this.packageId);
+          console.error('Policy Package ID:', ENV_VARS.POLICY_PACKAGE_ID);
+          console.error('Expected Testnet Seal:', '0x927a54e9ae803f82ebf480136a9bcff45101ccbe28b13f433c89f5181069d682');
+          console.error('Expected Testnet Policy:', '0xca7b6dafb380da7a0723ef54cc1f671e34225d6818d57bbe190313f4229448bf');
+          console.error('Are you using the correct network? Current: testnet');
+        }
+      }
+      
+      throw new Error(`Failed to encrypt role data with Seal: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

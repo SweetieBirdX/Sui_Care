@@ -4,7 +4,12 @@ import { useUserRole, type UserRole } from '../hooks/useUserRole';
 import { RoleSelection } from './RoleSelection';
 import { useEffect, useState } from 'react';
 
-export function KYCVerification() {
+interface KYCVerificationProps {
+  onKYCComplete: () => void;
+  isVisible: boolean;
+}
+
+export function KYCVerification({ onKYCComplete, isVisible }: KYCVerificationProps) {
   const account = useCurrentAccount();
   const {
     status,
@@ -36,15 +41,32 @@ export function KYCVerification() {
 
   // Show role selection after KYC verification
   useEffect(() => {
-    if (status === 'verified' && !roleData && !showRoleSelection) {
+    console.log('🔍 KYCVerification Debug:', {
+      status,
+      roleData,
+      showRoleSelection,
+      isVerified: verificationResult?.isVerified
+    });
+    
+    if (status === 'verified' && !showRoleSelection) {
+      console.log('✅ KYC verified, calling onKYCComplete callback');
       setShowRoleSelection(true);
+      // Call the callback to notify parent component
+      onKYCComplete();
     }
-  }, [status, roleData, showRoleSelection]);
+  }, [status, showRoleSelection, onKYCComplete, verificationResult]);
 
   const handleVerifyKYC = async () => {
     if (!account?.address) return;
     
-    await verifyZKProof(account.address);
+    console.log('🔄 Starting KYC verification...');
+    const result = await verifyZKProof(account.address);
+    
+    if (result.isVerified) {
+      console.log('✅ KYC verification successful, calling onKYCComplete');
+      // Call callback immediately after successful verification
+      onKYCComplete();
+    }
   };
 
   const handleResetVerification = () => {
@@ -56,7 +78,7 @@ export function KYCVerification() {
     setShowRoleSelection(false);
   };
 
-  if (!account) {
+  if (!isVisible || !account) {
     return (
       <div className="kyc-verification">
         <h3>🔐 KYC Verification</h3>
