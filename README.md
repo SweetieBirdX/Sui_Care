@@ -1,117 +1,241 @@
-# Sui Care dApp
+# Sui Care - Merkezi Olmayan Sağlık Yönetim Sistemi
 
-A React TypeScript dApp built with Sui SDK integration, featuring wallet connectivity and state management for the Sui ecosystem.
+Sui Care, blockchain teknolojisi kullanarak güvenli ve şeffaf bir sağlık verisi yönetim sistemi sunan kapsamlı bir dApp'tir. Sui blockchain ağı üzerinde çalışan bu sistem, hasta verilerinin güvenli saklanması, erişim kontrolü ve sağlık profesyonelleri arasında güvenli veri paylaşımı sağlar.
 
-## Features
+## 🏥 Proje Özeti
 
-- 🔗 **Wallet Integration**: Connect with Sui-compatible wallets
-- 🌐 **Multi-Network Support**: Testnet and Mainnet network switching
-- 📊 **Real-time Data**: Live wallet balance and object information
-- 🎨 **Modern UI**: Beautiful, responsive interface with glassmorphism design
-- ⚡ **TypeScript**: Full type safety and developer experience
-- 🔄 **State Management**: React Query for efficient data fetching
+Sui Care, modern sağlık hizmetlerinin ihtiyaçlarını karşılamak için tasarlanmış kapsamlı bir blockchain tabanlı sağlık yönetim platformudur. Sistem, hasta verilerinin güvenli bir şekilde saklanması, farklı sağlık profesyonelleri arasında kontrollü veri paylaşımı ve acil durum erişim yönetimi gibi kritik işlevleri sunar.
 
-## Tech Stack
+### 🎯 Ana Özellikler
 
-- **React 18** with TypeScript
-- **Vite** for fast development and building
-- **@mysten/dapp-kit** for Sui wallet integration
-- **@mysten/sui** for Sui blockchain interaction
-- **@tanstack/react-query** for state management
-- **CSS3** with modern styling
+- **🔐 Güvenli Veri Yönetimi**: Hasta verilerinin şifrelenmiş olarak saklanması ve güvenli erişim kontrolü
+- **👥 Rol Tabanlı Erişim**: Doktor, Eczacı ve Hasta rolleri için farklı yetkilendirme seviyeleri
+- **📋 KYC Doğrulama**: Kimlik doğrulama ve yetkilendirme sistemi
+- **🚨 Acil Durum Erişimi**: Kritik durumlarda hızlı veri erişimi
+- **📊 Denetim İzi**: Tüm veri erişimlerinin kayıt altına alınması
+- **🔗 Blockchain Entegrasyonu**: Sui blockchain ağı ile tam entegrasyon
+- **💼 Çoklu Rol Desteği**: Farklı sağlık profesyonelleri için özelleştirilmiş arayüzler
 
-## Getting Started
+### 🏗️ Sistem Mimarisi
 
-### Prerequisites
+#### Frontend (React + TypeScript)
+- **Modern UI/UX**: Glassmorphism tasarım ile kullanıcı dostu arayüz
+- **Rol Tabanlı Yönlendirme**: Kullanıcı rolüne göre özelleştirilmiş dashboard'lar
+- **Gerçek Zamanlı Veri**: React Query ile etkili veri yönetimi
+- **Çoklu Ağ Desteği**: Testnet ve Mainnet arasında geçiş
 
-- Node.js 18+ 
-- npm or yarn
+#### Backend (Sui Move Smart Contracts)
+- **Sağlık Erişim Politikası**: Rol tabanlı izin yönetimi
+- **Erişim Kontrol Sistemi**: Veri erişim istekleri ve onayları
+- **Acil Durum Yönetimi**: Kritik durumlarda hızlı erişim
+- **Denetim ve Loglama**: Tüm işlemlerin kayıt altına alınması
 
-### Installation
+### 📊 Desteklenen Veri Türleri
 
-1. Clone the repository:
+- **Laboratuvar Sonuçları**: Kan tahlilleri, biyokimya sonuçları
+- **Reçeteler**: İlaç reçeteleri ve dozaj bilgileri
+- **Tıbbi Kayıtlar**: Hasta geçmişi ve muayene notları
+- **Tanılar**: ICD-10 kodlu tanı bilgileri
+- **Tedavi Planları**: Uzun vadeli tedavi stratejileri
+- **Vital Bulgular**: Kan basıncı, nabız, ateş gibi ölçümler
+- **Görüntüleme Sonuçları**: Radyoloji ve görüntüleme raporları
+- **İlaç Geçmişi**: Kullanılan ilaçların detaylı kayıtları
+
+### 🔒 Güvenlik Özellikleri
+
+- **Şifreleme**: Tüm verilerin güvenli şifreleme ile korunması
+- **Erişim Kontrolü**: Granüler izin yönetimi sistemi
+- **Kendi Kendine Yetkilendirme Yasak**: Güvenlik için kendi verilerini değiştirme kısıtlaması
+- **Acil Durum Protokolleri**: Kritik durumlarda kontrollü erişim
+- **Denetim İzi**: Tüm işlemlerin blockchain üzerinde kayıt altına alınması
+
+## 🛠️ Teknoloji Stack'i
+
+### Frontend
+- **React 18** + **TypeScript** - Modern UI framework
+- **Vite** - Hızlı geliştirme ve build süreci
+- **@mysten/dapp-kit** - Sui wallet entegrasyonu
+- **@mysten/sui** - Sui blockchain etkileşimi
+- **@tanstack/react-query** - Veri yönetimi
+- **Tailwind CSS** - Modern styling
+- **Lucide React** - İkon kütüphanesi
+
+### Backend
+- **Sui Move** - Akıllı kontrat geliştirme
+- **Sui Framework** - Blockchain altyapısı
+- **Walrus** - Veri depolama servisi
+- **Seal** - Şifreleme servisi
+
+### Geliştirme Araçları
+- **TypeScript** - Tip güvenliği
+- **Vite** - Build tool
+- **PostCSS** - CSS işleme
+- **Autoprefixer** - CSS uyumluluğu
+
+## 🚀 Kurulum ve Çalıştırma
+
+### Gereksinimler
+- Node.js 18+
+- npm veya yarn
+- Sui CLI (blockchain işlemleri için)
+
+### Kurulum Adımları
+
+1. **Repository'yi klonlayın:**
 ```bash
 git clone <repository-url>
 cd Sui_Care
 ```
 
-2. Install dependencies:
+2. **Bağımlılıkları yükleyin:**
 ```bash
 npm install
 ```
 
-3. Start the development server:
+3. **Geliştirme sunucusunu başlatın:**
 ```bash
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+4. **Tarayıcınızda açın:**
+```
+http://localhost:5173
+```
 
-### Building for Production
+### Production Build
 
 ```bash
 npm run build
 ```
 
-The built files will be in the `dist` directory.
+Build edilen dosyalar `dist` klasöründe oluşturulur.
 
-## Project Structure
+## 📁 Proje Yapısı
 
 ```
-src/
-├── components/          # React components
-│   ├── WalletConnectButton.tsx
-│   ├── NetworkSelector.tsx
-│   └── WalletInfo.tsx
-├── config/             # Configuration files
-│   └── networks.ts     # Network configurations
-├── providers/          # React context providers
-│   └── AppProviders.tsx
-├── App.tsx            # Main application component
-├── App.css            # Application styles
-├── main.tsx           # Application entry point
-└── index.css          # Global styles
+Sui_Care/
+├── contracts/                    # Sui Move akıllı kontratları
+│   └── sui_care/
+│       ├── sources/             # Move kaynak dosyaları
+│       │   ├── health_access_policy.move
+│       │   ├── access_control.move
+│       │   └── emergency_access.move
+│       └── Move.toml           # Move proje konfigürasyonu
+├── src/                         # Frontend kaynak kodları
+│   ├── components/              # React bileşenleri
+│   │   ├── DoctorDashboard.tsx     # Doktor paneli
+│   │   ├── PatientDashboard.tsx    # Hasta paneli
+│   │   ├── PharmacyDashboard.tsx   # Eczacı paneli
+│   │   ├── KYCVerification.tsx     # KYC doğrulama
+│   │   ├── HealthDataManager.tsx   # Sağlık veri yönetimi
+│   │   ├── AccessRequestManager.tsx # Erişim istek yönetimi
+│   │   ├── AuditTrailViewer.tsx    # Denetim izi görüntüleme
+│   │   └── ui/                     # UI bileşenleri
+│   ├── services/                # Servis katmanı
+│   │   ├── dataService.ts          # Veri servisi
+│   │   ├── accessControlService.ts # Erişim kontrol servisi
+│   │   ├── auditTrailService.ts    # Denetim servisi
+│   │   ├── policyService.ts        # Politika servisi
+│   │   ├── sealService.ts          # Şifreleme servisi
+│   │   └── walrusService.ts        # Depolama servisi
+│   ├── types/                   # TypeScript tip tanımları
+│   │   └── healthData.ts           # Sağlık veri tipleri
+│   ├── hooks/                   # Custom React hooks
+│   │   ├── useUserRole.ts          # Kullanıcı rol yönetimi
+│   │   └── useZKProofVerification.ts # Zero-knowledge doğrulama
+│   ├── config/                  # Konfigürasyon dosyaları
+│   │   ├── networks.ts             # Ağ konfigürasyonları
+│   │   └── production.ts           # Production ayarları
+│   └── providers/               # React context providers
+│       └── AppProviders.tsx        # Ana provider
+└── public/                      # Statik dosyalar
 ```
 
-## Network Configuration
+## 🌐 Ağ Konfigürasyonu
 
-The application supports both Sui Testnet and Mainnet:
+Uygulama hem Sui Testnet hem de Mainnet'i destekler:
 
 - **Testnet**: `https://fullnode.testnet.sui.io:443`
 - **Mainnet**: `https://fullnode.mainnet.sui.io:443`
 
-You can switch between networks using the network selector in the UI.
+Ağ seçici ile UI üzerinden ağlar arasında geçiş yapabilirsiniz.
 
-## Wallet Integration
+## 🔐 Wallet Entegrasyonu
 
-The dApp integrates with Sui-compatible wallets through the `@mysten/dapp-kit` library, providing:
+dApp, `@mysten/dapp-kit` kütüphanesi aracılığıyla Sui uyumlu cüzdanlarla entegre olur:
 
-- Wallet connection/disconnection
-- Account information display
-- Balance queries
-- Object queries
-- Transaction capabilities
+- Cüzdan bağlantısı/bağlantı kesme
+- Hesap bilgileri görüntüleme
+- Bakiye sorguları
+- Obje sorguları
+- İşlem yetenekleri
 
-## Development
+## 👥 Kullanıcı Rolleri
 
-### Available Scripts
+### 🩺 Doktor
+- Tüm sağlık verilerine tam erişim
+- Veri oluşturma, düzenleme ve silme yetkisi
+- Hasta verilerine erişim isteği oluşturma
+- Acil durum erişimi başlatma
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
+### 💊 Eczacı
+- Reçete verilerine sadece okuma erişimi
+- İlaç bilgilerini görüntüleme
+- Reçete doğrulama
 
-### Code Style
+### 🏥 Hasta
+- Kendi verilerine sadece okuma erişimi
+- Veri erişim isteklerini onaylama/reddetme
+- Acil durum erişimini iptal etme
 
-The project uses TypeScript with strict mode enabled. All components are functional components using React hooks.
+## 🚨 Acil Durum Yönetimi
 
-## Contributing
+Sistem, kritik durumlarda hızlı veri erişimi için özel protokoller içerir:
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+- Yetkili doktorlar tarafından acil erişim başlatma
+- Zaman sınırlı erişim (maksimum 24 saat)
+- Tüm acil erişim işlemlerinin kayıt altına alınması
+- Hasta veya doktor tarafından erişimi iptal etme
 
-## License
+## 📈 Denetim ve İzleme
 
-This project is licensed under the MIT License.
+- Tüm veri erişimlerinin blockchain üzerinde kayıt altına alınması
+- Erişim istekleri ve onaylarının takibi
+- Acil durum erişimlerinin detaylı loglanması
+- Şeffaf ve değiştirilemez denetim izi
+
+## 🔧 Geliştirme
+
+### Mevcut Scriptler
+
+- `npm run dev` - Geliştirme sunucusunu başlat
+- `npm run build` - Production için build et
+- `npm run preview` - Production build'i önizle
+
+### Kod Stili
+
+Proje TypeScript strict mode ile yazılmıştır. Tüm bileşenler React hooks kullanan fonksiyonel bileşenlerdir.
+
+## 🤝 Katkıda Bulunma
+
+1. Repository'yi fork edin
+2. Feature branch oluşturun
+3. Değişikliklerinizi yapın
+4. Kapsamlı test edin
+5. Pull request gönderin
+
+## 📄 Lisans
+
+Bu proje MIT Lisansı altında lisanslanmıştır.
+
+## 🔮 Gelecek Planları
+
+- **Zero-Knowledge Proofs**: Gelişmiş gizlilik koruması
+- **Interoperability**: Diğer blockchain ağları ile entegrasyon
+- **AI Integration**: Yapay zeka destekli tanı önerileri
+- **Mobile App**: Mobil uygulama geliştirme
+- **Telemedicine**: Uzaktan sağlık hizmetleri entegrasyonu
+
+---
+
+**Sui Care** - Sağlık verilerinizin güvenliği ve şeffaflığı için blockchain teknolojisinin gücünü kullanıyoruz. 🏥🔗
