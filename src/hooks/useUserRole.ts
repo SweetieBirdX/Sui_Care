@@ -54,16 +54,20 @@ export function useUserRole() {
       let foundBlobId: string | null = null;
       let encryptedData: Uint8Array | null = null;
 
-      // Check each possible blob ID
+      // Check each possible blob ID with rate limiting
       for (const id of possibleBlobIds) {
+        console.log(`🔍 Checking role data for blob ID: ${id}`);
         const exists = await walrusService.checkRoleDataExists(id);
         if (exists) {
+          console.log(`✅ Found existing role data for blob ID: ${id}`);
           const data = await walrusService.getRoleData(id);
           if (data) {
             foundBlobId = id;
             encryptedData = data;
             break;
           }
+        } else {
+          console.log(`❌ No role data found for blob ID: ${id}`);
         }
       }
 

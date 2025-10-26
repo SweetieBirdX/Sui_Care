@@ -39,7 +39,7 @@ export default defineConfig({
     },
   },
   define: {
-    // Environment variables for browser
-    'process.env': process.env,
+    // Only expose specific environment variables for browser
+    'process.env.VITE_WALRUS_JWT_TOKEN': JSON.stringify(process.env.VITE_WALRUS_JWT_TOKEN),
   },
 });

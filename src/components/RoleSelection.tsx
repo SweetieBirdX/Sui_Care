@@ -70,9 +70,6 @@ export function RoleSelection({ onRoleSelected, isVisible }: RoleSelectionProps)
     <div className="role-selection">
       <div className="role-selection-header">
         <h3>🎭 Select Your Role</h3>
-        <div className="testnet-warning">
-          <p>⚠️ <strong>Testnet Warning:</strong> Your role data may be lost due to Walrus Testnet instability. For production use, migrate to Mainnet.</p>
-        </div>
         <p>Choose your role in the healthcare ecosystem to continue.</p>
       </div>
 

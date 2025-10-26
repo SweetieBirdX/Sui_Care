@@ -6,6 +6,9 @@ export class WalrusService {
   private fallbackUrls: string[];
   private apiKey?: string;
   private network: 'testnet' | 'mainnet';
+  private lastRequestTime: number = 0;
+  private requestInterval: number = 7000; // 7 seconds between requests
+  private pendingRequests: Map<string, Promise<any>> = new Map();
 
   constructor(network: 'testnet' | 'mainnet' = 'testnet') {
     this.network = network;
@@ -18,7 +21,7 @@ export class WalrusService {
         // Add other Mainnet publishers if available
       ];
       // JWT token for Mainnet authentication
-      this.apiKey = process.env.VITE_WALRUS_JWT_TOKEN || undefined;
+      this.apiKey = (typeof process !== 'undefined' && process.env?.VITE_WALRUS_JWT_TOKEN) || undefined;
       
       if (!this.apiKey) {
         console.warn('⚠️ No JWT token provided for Walrus Mainnet. Authentication may fail.');
@@ -43,6 +46,25 @@ export class WalrusService {
     }
   }
 
+  // Rate limiting to prevent too many requests
+  private async waitForRateLimit(): Promise<void> {
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    
+    if (timeSinceLastRequest < this.requestInterval) {
+      const waitTime = this.requestInterval - timeSinceLastRequest;
+      console.log(`⏳ Rate limiting: waiting ${waitTime}ms before next request`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+    
+    this.lastRequestTime = Date.now();
+  }
+
+  // Check if request is already pending to avoid duplicates
+  private getRequestKey(operationName: string, url: string): string {
+    return `${operationName}_${url}`;
+  }
+
   // Try multiple Walrus URLs with fallback
   private async tryWithFallback<T>(
     operation: (url: string) => Promise<T>,
@@ -54,11 +76,34 @@ export class WalrusService {
     
     for (let i = 0; i < urls.length; i++) {
       try {
+        // Wait for rate limit before each request
+        await this.waitForRateLimit();
+        
+        // Check if request is already pending
+        const requestKey = this.getRequestKey(operationName, urls[i]);
+        if (this.pendingRequests.has(requestKey)) {
+          console.log(`🔄 Request already pending for ${operationName} with ${urls[i]}, waiting...`);
+          return await this.pendingRequests.get(requestKey)!;
+        }
+        
         console.log(`🔄 Trying ${operationName} with URL: ${urls[i]}`);
-        const result = await operation(urls[i]);
+        
+        // Create and store the pending request
+        const requestPromise = operation(urls[i]);
+        this.pendingRequests.set(requestKey, requestPromise);
+        
+        const result = await requestPromise;
+        
+        // Remove from pending requests
+        this.pendingRequests.delete(requestKey);
+        
         console.log(`✅ ${operationName} succeeded with URL: ${urls[i]}`);
         return result;
       } catch (error) {
+        // Remove from pending requests on error
+        const requestKey = this.getRequestKey(operationName, urls[i]);
+        this.pendingRequests.delete(requestKey);
+        
         let errorMessage = `${operationName} failed with URL ${urls[i]}: ${error instanceof Error ? error.message : String(error)}`;
         
         // Check for specific error types
