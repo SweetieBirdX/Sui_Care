@@ -1,81 +1,67 @@
 import React from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
-import { useUserRole } from '../hooks/useUserRole';
 
 export function PatientDashboard() {
   const account = useCurrentAccount();
-  const { roleData } = useUserRole();
 
   return (
     <div className="dashboard patient-dashboard">
       <div className="dashboard-header">
         <h2>👤 Patient Dashboard</h2>
         <p>Welcome, Patient {account?.address?.slice(0, 8)}...</p>
-        <div className="role-badge patient">PATIENT</div>
       </div>
 
       <div className="dashboard-content">
         <div className="dashboard-section">
-          <h3>My Health Records</h3>
-          <p>View your personal health information and medical history.</p>
-          <div className="permissions">
-            <div className="permission-item">
-              <span className="permission-icon">👁️</span>
-              <span>View your own data</span>
-            </div>
-            <div className="permission-item">
-              <span className="permission-icon">🔒</span>
-              <span>Control data access permissions</span>
-            </div>
-            <div className="permission-item">
-              <span className="permission-icon">❌</span>
-              <span>Cannot modify existing records</span>
-            </div>
-            <div className="permission-item">
-              <span className="permission-icon">❌</span>
-              <span>Cannot access other patients' data</span>
+          <h3>📋 My Health Records</h3>
+          <div className="section-content">
+            <p>View your personal health information (read-only)</p>
+            <div className="action-buttons">
+              <button className="btn-primary">View My Records</button>
+              <button className="btn-secondary">Download Report</button>
             </div>
           </div>
         </div>
 
         <div className="dashboard-section">
-          <h3>Access Control</h3>
-          <p>Manage who can access your health data.</p>
-          <div className="access-controls">
-            <button className="access-btn grant">
-              👨‍⚕️ Grant Doctor Access
-            </button>
-            <button className="access-btn revoke">
-              🚫 Revoke Access
-            </button>
-          </div>
-        </div>
-
-        <div className="dashboard-section">
-          <h3>My Data</h3>
-          <p>Your personal health information.</p>
-          <div className="data-summary">
-            <div className="data-item">
-              <span className="data-label">Lab Results:</span>
-              <span className="data-count">3 records</span>
-            </div>
-            <div className="data-item">
-              <span className="data-label">Prescriptions:</span>
-              <span className="data-count">2 active</span>
-            </div>
-            <div className="data-item">
-              <span className="data-label">Medical History:</span>
-              <span className="data-count">5 entries</span>
+          <h3>💊 My Prescriptions</h3>
+          <div className="section-content">
+            <p>View your current and past prescriptions</p>
+            <div className="action-buttons">
+              <button className="btn-primary">View Prescriptions</button>
+              <button className="btn-secondary">Prescription History</button>
             </div>
           </div>
         </div>
 
         <div className="dashboard-section">
-          <h3>Important Notice</h3>
-          <div className="patient-notice">
-            <p>🔒 <strong>Data Protection:</strong> You can view your own data and control access permissions, 
-            but you cannot modify existing health records. Only authorized doctors can add new information to your records.</p>
+          <h3>🔐 Access Control</h3>
+          <div className="section-content">
+            <p>Manage who can access your health data</p>
+            <div className="action-buttons">
+              <button className="btn-primary">View Access Requests</button>
+              <button className="btn-secondary">Grant Access</button>
+            </div>
           </div>
+        </div>
+
+        <div className="dashboard-section">
+          <h3>📊 Health Analytics</h3>
+          <div className="section-content">
+            <p>View your health trends and statistics</p>
+            <div className="action-buttons">
+              <button className="btn-primary">View Analytics</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="dashboard-footer">
+        <p className="role-info">
+          <strong>Role:</strong> Patient | <strong>Permissions:</strong> View own data only, No modification rights
+        </p>
+        <div className="restriction-notice">
+          <p>⚠️ <strong>Access Restriction:</strong> You can only view your own data. You cannot modify any health information.</p>
         </div>
       </div>
     </div>

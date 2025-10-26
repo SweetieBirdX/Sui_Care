@@ -7,19 +7,36 @@ export function UnauthorizedPage() {
   return (
     <div className="unauthorized-page">
       <div className="unauthorized-content">
-        <div className="error-icon">🚫</div>
+        <div className="unauthorized-icon">🚫</div>
         <h2>Access Denied</h2>
-        <p>You don't have permission to access this page.</p>
-        <div className="unauthorized-details">
-          <p><strong>Wallet:</strong> {account?.address?.slice(0, 8)}...</p>
-          <p><strong>Status:</strong> Unauthorized access attempt</p>
+        <p>You don't have permission to access this area.</p>
+        
+        {account ? (
+          <div className="unauthorized-details">
+            <p>Your wallet: {account.address.slice(0, 8)}...</p>
+            <p>Please contact an administrator if you believe this is an error.</p>
+          </div>
+        ) : (
+          <div className="unauthorized-details">
+            <p>Please connect your wallet to access the system.</p>
+          </div>
+        )}
+
+        <div className="unauthorized-actions">
+          <button 
+            className="btn-primary"
+            onClick={() => window.location.reload()}
+          >
+            🔄 Refresh Page
+          </button>
         </div>
-        <button 
-          className="retry-btn"
-          onClick={() => window.location.reload()}
-        >
-          🔄 Refresh Page
-        </button>
+
+        <div className="security-notice">
+          <p>
+            🔒 <strong>Security Notice:</strong> Access control is enforced by on-chain policies. 
+            Even if you bypass the UI, Seal Key Servers will deny decryption without proper authorization.
+          </p>
+        </div>
       </div>
     </div>
   );

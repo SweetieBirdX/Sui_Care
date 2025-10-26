@@ -4,7 +4,7 @@ import { useUserRole } from '../hooks/useUserRole';
 import { DoctorDashboard } from './DoctorDashboard';
 import { PharmacyDashboard } from './PharmacyDashboard';
 import { PatientDashboard } from './PatientDashboard';
-import { RoleSelection } from './RoleSelection';
+import { RoleSetup } from './RoleSetup';
 import { UnauthorizedPage } from './UnauthorizedPage';
 import { KYCVerification } from './KYCVerification';
 
@@ -72,11 +72,11 @@ export function RoleBasedRouter() {
     );
   }
 
-  // After KYC completion, show role selection if no role is selected
+  // After KYC completion, show role setup if no role is selected
   if (kycCompleted && (roleData?.role === 'UNASSIGNED' || !roleData?.role)) {
-    console.log('🎭 Showing role selection after KYC completion');
+    console.log('🎭 Showing role setup after KYC completion');
     return (
-      <RoleSelection 
+      <RoleSetup 
         onRoleSelected={(role) => {
           console.log(`Role ${role} selected, will be saved by useUserRole hook`);
         }} 
