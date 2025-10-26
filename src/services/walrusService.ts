@@ -1,12 +1,14 @@
+import { ENV_VARS } from '../config/production';
+
 // Walrus storage service for encrypted role data
 export class WalrusService {
   private baseUrl: string;
   private apiKey?: string;
 
-  constructor(network: 'testnet' | 'mainnet' = 'testnet') {
-    this.baseUrl = network === 'testnet' 
-      ? 'https://publisher.testnet.walrus.space/v1'
-      : 'https://publisher.mainnet.walrus.space/v1';
+  constructor(_network: 'testnet' | 'mainnet' = 'testnet') {
+    // Use production configuration for Walrus URLs
+    this.baseUrl = ENV_VARS.WALRUS_PUBLISHER_URL;
+    this.apiKey = undefined; // Add API key if required
   }
 
   // Store encrypted role data in Walrus

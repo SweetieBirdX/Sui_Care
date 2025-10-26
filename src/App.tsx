@@ -4,9 +4,16 @@ import { NetworkSelector } from './components/NetworkSelector';
 import { WalletInfo } from './components/WalletInfo';
 import { KYCVerification } from './components/KYCVerification';
 import { HealthDataManager } from './components/HealthDataManager';
+import { logProductionStatus } from './config/production';
+import { useEffect } from 'react';
 import './App.css';
 
 function App() {
+  // Check production readiness on app load
+  useEffect(() => {
+    logProductionStatus();
+  }, []);
+
   return (
     <AppProviders>
       <div className="app">

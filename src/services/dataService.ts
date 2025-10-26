@@ -19,7 +19,7 @@ export class DataService {
   private walrusService: WalrusService;
   private policyService: PolicyService;
 
-  constructor(suiClient: SuiClient, packageId: string, policyObjectId: string) {
+  constructor(suiClient: SuiClient, packageId?: string, policyObjectId?: string) {
     this.sealService = new SealService(suiClient);
     this.walrusService = new WalrusService('testnet');
     this.policyService = new PolicyService(suiClient, packageId, policyObjectId);

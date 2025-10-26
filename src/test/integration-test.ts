@@ -2,7 +2,6 @@
 import { SealService } from '../services/sealService';
 import { WalrusService } from '../services/walrusService';
 import { DataService } from '../services/dataService';
-import { SuiClient } from '@mysten/sui/client';
 
 // Mock SuiClient for testing
 const mockSuiClient = {

@@ -1,5 +1,6 @@
 import { SealClient, DemType } from '@mysten/seal';
 import { SuiClient } from '@mysten/sui/client';
+import { ENV_VARS } from '../config/production';
 
 // Role metadata structure
 export interface RoleMetadata {
@@ -15,21 +16,16 @@ export class SealService {
   private packageId: string;
 
   constructor(suiClient: SuiClient) {
-    // Initialize Seal client with key server configuration
+    // Initialize Seal client with real SuiClient and production key server configuration
     this.sealClient = new SealClient({
       suiClient: suiClient as any, // Cast to SealCompatibleClient
-      serverConfigs: [
-        {
-          objectId: '0x1', // Default key server object ID for testnet
-          weight: 1,
-        }
-      ],
+      serverConfigs: ENV_VARS.SEAL_KEY_SERVERS, // Real key server object IDs from environment
       verifyKeyServers: false, // Set to true in production
       timeout: 30000, // 30 seconds timeout
     });
     
-    // Package ID for Seal protocol (this should be the actual package ID)
-    this.packageId = '0x2'; // This should be the actual Seal package ID
+    // Package ID for Seal protocol - using production configuration
+    this.packageId = ENV_VARS.SEAL_PACKAGE_ID;
   }
 
   // Encrypt role data using real Seal SDK

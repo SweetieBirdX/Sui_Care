@@ -1,5 +1,6 @@
 import { SuiClient } from '@mysten/sui/client';
 import { Transaction } from '@mysten/sui/transactions';
+import { ENV_VARS } from '../config/production';
 
 // Move contract constants
 export const ROLE_TYPES = {
@@ -58,10 +59,11 @@ export class PolicyService {
   private packageId: string;
   private policyObjectId: string;
 
-  constructor(suiClient: SuiClient, packageId: string, policyObjectId: string) {
+  constructor(suiClient: SuiClient, packageId?: string, policyObjectId?: string) {
     this.suiClient = suiClient;
-    this.packageId = packageId;
-    this.policyObjectId = policyObjectId;
+    // Use production configuration if not provided
+    this.packageId = packageId || ENV_VARS.POLICY_PACKAGE_ID;
+    this.policyObjectId = policyObjectId || ENV_VARS.POLICY_OBJECT_ID;
   }
 
   /**
