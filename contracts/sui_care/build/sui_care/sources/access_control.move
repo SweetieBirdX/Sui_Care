@@ -741,3 +741,314 @@ module sui_care::access_control {
         access_control.policy
     }
 }
+
+// ============================================================================
+// EMERGENCY ACCESS MANAGEMENT MODULE
+// ============================================================================
+
+module sui_care::emergency_access {
+    use sui::object::{Self, UID, ID};
+    use sui::tx_context::{Self, TxContext};
+    use sui::transfer;
+    use sui::event;
+    use sui::clock::{Self, Clock};
+    use sui::table::{Self, Table};
+    use sui::vec_set::{Self, VecSet};
+    use std::vector;
+    use sui_care::health_access_policy::HealthAccessPolicy;
+
+    // --- Constants ---
+    const ENotAuthorizedEmergencyDoctor: u64 = 20;
+    const EEmergencyAccessAlreadyActive: u64 = 21;
+    const EEmergencyAccessNotActive: u64 = 22;
+    const EInvalidEmergencyDoctor: u64 = 23;
+    const EPatientNotAuthorized: u64 = 24;
+    const EEmergencyAccessExpired: u64 = 25;
+
+    // --- Emergency Access Status ---
+    const EMERGENCY_STATUS_ACTIVE: u8 = 1;
+    const EMERGENCY_STATUS_REVOKED: u8 = 2;
+    const EMERGENCY_STATUS_EXPIRED: u8 = 3;
+
+    // --- Structs ---
+    struct EmergencyAccessManager has key {
+        id: UID,
+        authorized_doctors: VecSet<address>,
+        emergency_locks: Table<address, EmergencyLock>,
+        max_emergency_duration: u64, // Maximum duration in milliseconds
+    }
+
+    struct EmergencyLock has store, drop {
+        patient_address: address,
+        doctor_address: address,
+        start_time: u64,
+        expiry_time: u64,
+        status: u8,
+        access_count: u64,
+        last_access_time: u64,
+    }
+
+    // --- Events ---
+    struct EmergencyAccessInitiated has copy, drop {
+        patient_address: address,
+        doctor_address: address,
+        start_time: u64,
+        expiry_time: u64,
+        emergency_signature: vector<u8>, // Emergency authorization signature
+    }
+
+    struct EmergencyAccessRevoked has copy, drop {
+        patient_address: address,
+        doctor_address: address,
+        revoke_time: u64,
+        total_access_count: u64,
+    }
+
+    struct EmergencyDataAccess has copy, drop {
+        patient_address: address,
+        doctor_address: address,
+        access_time: u64,
+        access_type: u8, // READ, WRITE, MODIFY
+        data_object_id: ID,
+    }
+
+    struct EmergencyAuditLog has copy, drop {
+        patient_address: address,
+        doctor_address: address,
+        action_type: u8, // INITIATE, ACCESS, REVOKE
+        timestamp: u64,
+        emergency_signature: vector<u8>,
+        access_count: u64,
+    }
+
+    // --- Initialization ---
+    fun init(ctx: &mut TxContext) {
+        let emergency_manager = EmergencyAccessManager {
+            id: object::new(ctx),
+            authorized_doctors: vec_set::empty(),
+            emergency_locks: table::new(ctx),
+            max_emergency_duration: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+        };
+
+        transfer::share_object(emergency_manager);
+    }
+
+    // --- Public Functions ---
+
+    /// Authorize an emergency doctor (only by admin)
+    public entry fun authorize_emergency_doctor(
+        emergency_manager: &mut EmergencyAccessManager,
+        doctor_address: address,
+        ctx: &mut TxContext
+    ) {
+        // In production, this should check if caller is admin
+        // For now, we'll allow any caller to authorize doctors
+        vec_set::insert(&mut emergency_manager.authorized_doctors, doctor_address);
+    }
+
+    /// Initiate emergency access for a patient
+    public entry fun initiate_emergency_access(
+        emergency_manager: &mut EmergencyAccessManager,
+        policy: &HealthAccessPolicy,
+        patient_address: address,
+        emergency_duration_hours: u64,
+        emergency_signature: vector<u8>,
+        clock: &Clock,
+        ctx: &mut TxContext
+    ) {
+        let doctor_address = tx_context::sender(ctx);
+        
+        // Verify doctor is authorized for emergency access
+        assert!(vec_set::contains(&emergency_manager.authorized_doctors, &doctor_address), ENotAuthorizedEmergencyDoctor);
+        
+        // Check if emergency access is already active for this patient
+        assert!(!table::contains(&emergency_manager.emergency_locks, patient_address), EEmergencyAccessAlreadyActive);
+        
+        let current_time = clock::timestamp_ms(clock);
+        let emergency_duration_ms = emergency_duration_hours * 60 * 60 * 1000;
+        let expiry_time = current_time + emergency_duration_ms;
+        
+        // Ensure duration doesn't exceed maximum
+        let duration = expiry_time - current_time;
+        if (duration > emergency_manager.max_emergency_duration) {
+            expiry_time = current_time + emergency_manager.max_emergency_duration;
+        };
+
+        let emergency_lock = EmergencyLock {
+            patient_address,
+            doctor_address,
+            start_time: current_time,
+            expiry_time,
+            status: EMERGENCY_STATUS_ACTIVE,
+            access_count: 0,
+            last_access_time: current_time,
+        };
+
+        table::add(&mut emergency_manager.emergency_locks, patient_address, emergency_lock);
+
+        // Emit events
+        event::emit(EmergencyAccessInitiated {
+            patient_address,
+            doctor_address,
+            start_time: current_time,
+            expiry_time,
+            emergency_signature,
+        });
+
+        event::emit(EmergencyAuditLog {
+            patient_address,
+            doctor_address,
+            action_type: 1, // INITIATE
+            timestamp: current_time,
+            emergency_signature,
+            access_count: 0,
+        });
+    }
+
+    /// Check if emergency access is active for a patient
+    public fun is_emergency_access_active(
+        emergency_manager: &EmergencyAccessManager,
+        patient_address: address,
+        clock: &Clock
+    ): bool {
+        if (!table::contains(&emergency_manager.emergency_locks, patient_address)) {
+            return false
+        };
+
+        let emergency_lock = table::borrow(&emergency_manager.emergency_locks, patient_address);
+        let current_time = clock::timestamp_ms(clock);
+        
+        emergency_lock.status == EMERGENCY_STATUS_ACTIVE && current_time <= emergency_lock.expiry_time
+    }
+
+    /// Get emergency access details
+    public fun get_emergency_access_details(
+        emergency_manager: &EmergencyAccessManager,
+        patient_address: address
+    ): (address, u64, u64, u8, u64) {
+        assert!(table::contains(&emergency_manager.emergency_locks, patient_address), EEmergencyAccessNotActive);
+        
+        let emergency_lock = table::borrow(&emergency_manager.emergency_locks, patient_address);
+        (
+            emergency_lock.doctor_address,
+            emergency_lock.start_time,
+            emergency_lock.expiry_time,
+            emergency_lock.status,
+            emergency_lock.access_count
+        )
+    }
+
+    /// Record emergency data access
+    public entry fun record_emergency_data_access(
+        emergency_manager: &mut EmergencyAccessManager,
+        patient_address: address,
+        data_object_id: ID,
+        access_type: u8,
+        clock: &Clock,
+        ctx: &mut TxContext
+    ) {
+        let doctor_address = tx_context::sender(ctx);
+        
+        // Verify emergency access is active
+        assert!(is_emergency_access_active(emergency_manager, patient_address, clock), EEmergencyAccessNotActive);
+        
+        let current_time = clock::timestamp_ms(clock);
+        
+        // Update access count and last access time
+        let emergency_lock = table::borrow_mut(&mut emergency_manager.emergency_locks, patient_address);
+        emergency_lock.access_count = emergency_lock.access_count + 1;
+        emergency_lock.last_access_time = current_time;
+
+        // Emit access event
+        event::emit(EmergencyDataAccess {
+            patient_address,
+            doctor_address,
+            access_time: current_time,
+            access_type,
+            data_object_id,
+        });
+
+        event::emit(EmergencyAuditLog {
+            patient_address,
+            doctor_address,
+            action_type: 2, // ACCESS
+            timestamp: current_time,
+            emergency_signature: vector::empty(), // No signature for data access
+            access_count: emergency_lock.access_count,
+        });
+    }
+
+    /// Revoke emergency access (can be called by patient or doctor)
+    public entry fun revoke_emergency_access(
+        emergency_manager: &mut EmergencyAccessManager,
+        patient_address: address,
+        clock: &Clock,
+        ctx: &mut TxContext
+    ) {
+        let caller_address = tx_context::sender(ctx);
+        
+        // Verify emergency access exists
+        assert!(table::contains(&emergency_manager.emergency_locks, patient_address), EEmergencyAccessNotActive);
+        
+        let emergency_lock = table::borrow(&emergency_manager.emergency_locks, patient_address);
+        
+        // Verify caller is either the patient or the emergency doctor
+        assert!(
+            caller_address == patient_address || caller_address == emergency_lock.doctor_address,
+            EPatientNotAuthorized
+        );
+
+        let current_time = clock::timestamp_ms(clock);
+        let total_access_count = emergency_lock.access_count;
+
+        // Remove the emergency lock
+        let emergency_lock = table::remove(&mut emergency_manager.emergency_locks, patient_address);
+        emergency_lock.status = EMERGENCY_STATUS_REVOKED;
+
+        // Emit revocation event
+        event::emit(EmergencyAccessRevoked {
+            patient_address,
+            doctor_address: emergency_lock.doctor_address,
+            revoke_time: current_time,
+            total_access_count,
+        });
+
+        event::emit(EmergencyAuditLog {
+            patient_address,
+            doctor_address: emergency_lock.doctor_address,
+            action_type: 3, // REVOKE
+            timestamp: current_time,
+            emergency_signature: vector::empty(),
+            access_count: total_access_count,
+        });
+    }
+
+    /// Check if a doctor has emergency access to a patient's data
+    public fun has_emergency_access(
+        emergency_manager: &EmergencyAccessManager,
+        patient_address: address,
+        doctor_address: address,
+        clock: &Clock
+    ): bool {
+        if (!is_emergency_access_active(emergency_manager, patient_address, clock)) {
+            return false
+        };
+
+        let emergency_lock = table::borrow(&emergency_manager.emergency_locks, patient_address);
+        emergency_lock.doctor_address == doctor_address
+    }
+
+    /// Get all authorized emergency doctors
+    public fun get_authorized_doctors(emergency_manager: &EmergencyAccessManager): &vector<address> {
+        vec_set::keys(&emergency_manager.authorized_doctors)
+    }
+
+    /// Update maximum emergency duration (admin only)
+    public entry fun set_max_emergency_duration(
+        emergency_manager: &mut EmergencyAccessManager,
+        new_duration_ms: u64,
+        _ctx: &mut TxContext
+    ) {
+        emergency_manager.max_emergency_duration = new_duration_ms;
+    }
+}

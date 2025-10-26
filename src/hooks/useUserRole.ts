@@ -3,6 +3,10 @@ import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
 import { SealService, type RoleMetadata } from '../services/sealService';
 import { WalrusService } from '../services/walrusService';
 
+// WARNING: Walrus Testnet is periodically wiped and restarted
+// This means user role data can be lost at any time
+// For production use, migrate to Mainnet with proper JWT authentication
+
 export type UserRole = 'doctor' | 'pharmacist' | 'patient';
 
 export interface UserRoleData {
@@ -64,6 +68,8 @@ export function useUserRole() {
       }
 
       if (!encryptedData || !foundBlobId) {
+        console.warn('⚠️ No role data found in Walrus - This may indicate Testnet data wipe');
+        console.log('🔄 User will need to re-select their role due to Walrus Testnet instability');
         setStatus('not_found');
         return null;
       }
@@ -123,7 +129,9 @@ export function useUserRole() {
       const encryptedBlob = await sealService.encryptRoleData(roleMetadata, account.address);
 
       // Store in Walrus
+      console.log('🔄 Storing role data in Walrus Testnet (data may be wiped at any time)');
       await walrusService.storeRoleData(encryptedBlob, blobId);
+      console.log('✅ Role data stored successfully in Walrus');
 
       // Update local state
       const userRoleData: UserRoleData = {
@@ -135,6 +143,7 @@ export function useUserRole() {
 
       setRoleData(userRoleData);
       setStatus('loaded');
+      console.log('🎉 User role loaded successfully');
       return true;
 
     } catch (err) {

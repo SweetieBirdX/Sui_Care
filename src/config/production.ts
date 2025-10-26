@@ -1,6 +1,10 @@
 // Production configuration for Sui Care dApp
 // This file contains real production values that need to be updated
 
+// WARNING: Walrus Testnet is periodically wiped and restarted
+// This means all data can be lost at any time - DO NOT use for production
+// Mainnet is required for any level of stability
+
 export const PRODUCTION_CONFIG = {
   // Sui Network Configuration
   SUI_NETWORKS: {
@@ -20,11 +24,23 @@ export const PRODUCTION_CONFIG = {
       publisherUrl: 'https://publisher.walrus-testnet.walrus.space/v1',
       systemObjectId: '0x2134d52768ea07e8c43570ef975eb3e4c27a39fa6396bef985b5abc58d03ddd2', // Example from docs
       stakingObjectId: '0x10b9d30c28448939ce6c4d6c6e0ffce4a7f8a4ada8248bdad09ef8b70e4a3904', // Example from docs
+      requiresJWT: false,
+      costPerOperation: 'Free (but unstable)',
+      stability: 'Low - Data may be wiped at any time',
+      dataLossRisk: 'High - Periodic wipes and restarts'
     },
     mainnet: {
       publisherUrl: 'https://publisher.walrus-mainnet.walrus.space/v1',
       systemObjectId: '0x2134d52768ea07e8c43570ef975eb3e4c27a39fa6396bef985b5abc58d03ddd2', // Mainnet System Object
       stakingObjectId: '0x10b9d30c28448939ce6c4d6c6e0ffce4a7f8a4ada8248bdad09ef8b70e4a3904', // Mainnet Staking Object
+      // NOTE: Mainnet requires JWT authentication and has costs in SUI and WAL
+      requiresJWT: true,
+      costPerOperation: 'SUI + WAL tokens required',
+      // Mainnet provides stability and data persistence
+      stability: 'High - Data persists across restarts',
+      dataLossRisk: 'Low - Only in extreme network events',
+      // JWT Token for authentication
+      jwtToken: import.meta.env.VITE_WALRUS_JWT_TOKEN || undefined
     },
   },
 
@@ -87,23 +103,23 @@ export const PRODUCTION_CONFIG = {
 // Environment variables for production
 export const ENV_VARS = {
   // Sui Configuration
-  SUI_RPC_URL: process.env.VITE_SUI_RPC_URL || process.env.REACT_SUI_FULLNODE_URL || PRODUCTION_CONFIG.getRpcUrl(),
+  SUI_RPC_URL: import.meta.env.VITE_SUI_RPC_URL || PRODUCTION_CONFIG.getRpcUrl(),
   
-  // Walrus Configuration
-  WALRUS_PUBLISHER_URL: process.env.VITE_WALRUS_PUBLISHER_URL || process.env.REACT_WALRUS_PUBLISHER_URL || PRODUCTION_CONFIG.getWalrusUrl(),
-  WALRUS_SYSTEM_OBJECT_ID: process.env.VITE_WALRUS_SYSTEM_OBJECT_ID || process.env.REACT_WALRUS_SYSTEM_OBJECT_ID || PRODUCTION_CONFIG.getWalrusSystemObjectId(),
-  WALRUS_STAKING_OBJECT_ID: process.env.VITE_WALRUS_STAKING_OBJECT_ID || process.env.REACT_WALRUS_STAKING_OBJECT_ID || PRODUCTION_CONFIG.getWalrusStakingObjectId(),
+  // Walrus Configuration - Use working Testnet URL
+  WALRUS_PUBLISHER_URL: import.meta.env.VITE_WALRUS_PUBLISHER_URL || 'https://publisher.walrus-testnet.walrus.space/v1',
+  WALRUS_SYSTEM_OBJECT_ID: import.meta.env.VITE_WALRUS_SYSTEM_OBJECT_ID || PRODUCTION_CONFIG.getWalrusSystemObjectId(),
+  WALRUS_STAKING_OBJECT_ID: import.meta.env.VITE_WALRUS_STAKING_OBJECT_ID || PRODUCTION_CONFIG.getWalrusStakingObjectId(),
   
   // Seal Configuration
-  SEAL_PACKAGE_ID: process.env.VITE_SEAL_PACKAGE_ID || process.env.SEAL_PACKAGE_ID || PRODUCTION_CONFIG.SEAL_CONFIG.packageId,
-  SEAL_KEY_SERVERS: process.env.VITE_SEAL_KEY_SERVERS || process.env.REACT_SEAL_KEY_SERVER_URLS ? 
-    JSON.parse(process.env.VITE_SEAL_KEY_SERVERS || process.env.REACT_SEAL_KEY_SERVER_URLS || '[]') : 
+  SEAL_PACKAGE_ID: import.meta.env.VITE_SEAL_PACKAGE_ID || PRODUCTION_CONFIG.SEAL_CONFIG.packageId,
+  SEAL_KEY_SERVERS: import.meta.env.VITE_SEAL_KEY_SERVERS ? 
+    JSON.parse(import.meta.env.VITE_SEAL_KEY_SERVERS) : 
     PRODUCTION_CONFIG.SEAL_CONFIG.keyServers,
   
   // Policy Configuration
-  POLICY_PACKAGE_ID: process.env.VITE_POLICY_PACKAGE_ID || process.env.POLICY_PACKAGE_ID || process.env.PACKAGE_ID || PRODUCTION_CONFIG.POLICY_CONFIG.packageId,
-  POLICY_OBJECT_ID: process.env.VITE_POLICY_OBJECT_ID || process.env.POLICY_OBJECT_ID || PRODUCTION_CONFIG.POLICY_CONFIG.policyObjectId,
-  ACCESS_CONTROL_MANAGER_OBJECT_ID: process.env.VITE_ACCESS_CONTROL_MANAGER_OBJECT_ID || process.env.MANAGER_OBJECT_ID || '0x0',
+  POLICY_PACKAGE_ID: import.meta.env.VITE_POLICY_PACKAGE_ID || PRODUCTION_CONFIG.POLICY_CONFIG.packageId,
+  POLICY_OBJECT_ID: import.meta.env.VITE_POLICY_OBJECT_ID || PRODUCTION_CONFIG.POLICY_CONFIG.policyObjectId,
+  ACCESS_CONTROL_MANAGER_OBJECT_ID: import.meta.env.VITE_ACCESS_CONTROL_MANAGER_OBJECT_ID || '0x0',
 };
 
 // Validation function to check if all required production values are set
